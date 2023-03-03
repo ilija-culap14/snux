@@ -30,12 +30,10 @@ from random import randint
 
 ### Game relevant ###
 GAME_NAME = "Snux"
-GAME_VERSION = "1.0"
+GAME_VERSION = "2.0"
 GAME_LICENCE = "GPLv3"
 AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
-AUTHOR_LOGO = "Gabrijel Sokcevic"
-AUTHOR_LOGO_EMAIL = "gabrijel.sokcevic@hotmail.com"
 
 ### Keys ###
 KEY_UP = "<Up>"
