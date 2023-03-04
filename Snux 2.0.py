@@ -241,8 +241,8 @@ class Application(tk.Frame):
 			return distance
 
 		def update_index():
-			x = (int(str(self.GameFrame.coords(self.snake_head_object)[0]).replace(".0","")) - 15) / 5
-			y = (int(str(self.GameFrame.coords(self.snake_head_object)[1]).replace(".0","")) - 15) / 5			
+			x = str((int(str(self.GameFrame.coords(self.snake_head_object)[0] - 1).replace(".0","")) - 15) / 5).replace(".0","")
+			y = str((int(str(self.GameFrame.coords(self.snake_head_object)[1] - 3).replace(".0","")) - 15) / 5).replace(".0","")
 			if len(str(x)) == 1:
 				x = "0" + str(x)
 			if len(str(y)) == 1:
