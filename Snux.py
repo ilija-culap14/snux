@@ -34,6 +34,8 @@ GAME_VERSION = "2.0"
 GAME_LICENCE = "GPLv3"
 AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
+WINDOW_H = 900
+WINDOW_W = 900
 
 ### Keys ###
 KEY_UP = "<Up>"
@@ -74,23 +76,36 @@ class Application(tk.Frame):
 		self.welcome_menu()
 		
 	def create_gameframe(self):
-		self.GameFrame = tk.Canvas(self, height=300, width=300, bg=BG_COLOR)
-		li = [20, 20, 282, 20, 281, 20, 281, 282, 20, 281, 282, 281, 20, 20, 20, 282]
+		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
+		
+		# Test for background image
+		self.backgroundImage = tk.PhotoImage(file = "./data/ph/logo.gif")
+		self.backgroundImage = self.LogoImage.subsample(2, 2)
+		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage)
+		
+		
+		# GameFrame lines (4 of them)
+		li = [20, 20, WINDOW_W - 18, 20, 
+			  WINDOW_W - 19, 20, WINDOW_W - 19, WINDOW_H - 17, 
+			  20, WINDOW_H - 18, WINDOW_W - 19, WINDOW_H - 18, 
+			  20, 20, 20, WINDOW_H - 18]
+		
 		x = 0
 		for i in range(4):	
 			self.frame_line = self.GameFrame.create_line(li[x], li[x + 1], li[x + 2], li[x + 3], width=1, fill=FRAME_COLOR)
 			x += 4			
-		self.v_text = self.GameFrame.create_text(280, 290, anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '7', "bold"), fill=TEXT_COLOR)
+		self.v_text = self.GameFrame.create_text(WINDOW_W - 20, WINDOW_H - 10, anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '11'), fill=TEXT_COLOR)
 		self.GameFrame.pack()
 
 	def welcome_menu(self):
 		self.LogoImage = tk.PhotoImage(file = "./data/ph/logo.gif")
 		self.LogoImage = self.LogoImage.subsample(2, 2)
-		self.GameName = self.GameFrame.create_image(150, 70, image=self.LogoImage, tags="wmitemTag")
-		self.newGameButton = self.GameFrame.create_text(150, 130, text=LABEL_NEW_GAME, font=('Calibri', '13', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
-		self.tutorialButton = self.GameFrame.create_text(150, 160, text=LABEL_TUTORIAL, font=('Calibri', '13', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
-		self.aboutButton = self.GameFrame.create_text(150, 190, text=LABEL_ABOUT, font=('Calibri', '13', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
-		self.quitButton = self.GameFrame.create_text(150, 220, text=LABEL_QUIT, font=('Calibri', '13', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
+		self.GameName = self.GameFrame.create_image(WINDOW_W/2, WINDOW_H*0.2, image=self.LogoImage, tags="wmitemTag")
+		self.newGameButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.3, text=LABEL_NEW_GAME, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
+		self.tutorialButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.4, text=LABEL_TUTORIAL, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
+		self.aboutButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.5, text=LABEL_ABOUT, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
+		self.quitButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.6, text=LABEL_QUIT, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
+		
 		self.GameFrame.tag_bind(self.newGameButton, "<Button-1>", self.menu_option_new_game_clicked)
 		self.GameFrame.tag_bind(self.aboutButton, "<Button-1>", self.menu_option_about_clicked)
 		self.GameFrame.tag_bind(self.tutorialButton, "<Button-1>", self.menu_option_tutorial_clicked)
@@ -117,8 +132,6 @@ class Application(tk.Frame):
 		self.t3 = self.GameFrame.create_text(30, pad + 70, text="Lizenz: " + GAME_LICENCE, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.t4 = self.GameFrame.create_text(30, pad + 85, text="Author: " + AUTHOR, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.t5 = self.GameFrame.create_text(30, pad + 100, text="Email: " + AUTHOR_EMAIL, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t6 = self.GameFrame.create_text(30, pad + 115, text="Logo Design: " + AUTHOR_LOGO, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t7 = self.GameFrame.create_text(30, pad + 130, text="Email: " + AUTHOR_LOGO_EMAIL, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.zuruck_about_Button = self.GameFrame.create_text(260, 265, text=LABEL_BACK, font=('Calibri', '10', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="aboutItems", anchor=tk.SE, justify=tk.RIGHT)
 		self.GameFrame.tag_bind(self.zuruck_about_Button, "<Button-1>", self.zuruck_about_button_clicked)
 		
@@ -302,7 +315,7 @@ class Application(tk.Frame):
 			self.GameFrame.unbind(KEY_LEFT)
 			self.GameFrame.unbind(KEY_RIGHT)
 
-		self.score_text = self.GameFrame.create_text(20, 9, anchor=tk.W, justify=tk.LEFT, text=LABEL_SCORE + str(snake_points), font=('Calibri', '7', "bold"), fill=TEXT_COLOR)
+		self.score_text = self.GameFrame.create_text(20, 9, anchor=tk.W, justify=tk.LEFT, text=LABEL_SCORE + str(snake_points).replace(".0",""), font=('Calibri', '7', "bold"), fill=TEXT_COLOR)
 		self.level_text = self.GameFrame.create_text(280, 9, anchor=tk.E, justify=tk.RIGHT, text=LABEL_LEVEL + str(define_level(snake_tail)), font=('Calibri', '7', "bold"), fill=TEXT_COLOR, tags="gameItems")	
 		create_food()
 		create_head()
@@ -354,7 +367,7 @@ class Application(tk.Frame):
 			
 if __name__ == '__main__':
 	root = tk.Tk()
-	root.geometry("300x300")
+	root.geometry(str(WINDOW_W) + "x" + str(WINDOW_H))
 	root.resizable(width=False, height=False)
 	app = Application(root)
 	app.master.title(GAME_NAME)
