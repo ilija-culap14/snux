@@ -34,8 +34,8 @@ GAME_VERSION = "2.0"
 GAME_LICENCE = "GPLv3"
 AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
-WINDOW_H = 900
-WINDOW_W = 900
+WINDOW_H = 800
+WINDOW_W = 1000
 
 ### Keys ###
 KEY_UP = "<Up>"
@@ -48,8 +48,8 @@ BG_COLOR = "black"
 TEXT_COLOR = "yellow"
 SNAKE_COLOR = "#9191F8"
 FOOD_COLOR = "green"
-FRAME_COLOR = "yellow"
-MENU_TEXT_COLOR = "yellow"
+FRAME_COLOR = "white"
+MENU_TEXT_COLOR = "white"
 MENU_TEXT_COLOR_OVER = "#1B94C6"
 GAME_OVER_LABEL_COLOR = "yellow"
 GAME_WIN_LABEL_COLOR = "yellow"
@@ -68,6 +68,9 @@ LABEL_LEVEL = "Level: "
 LABEL_VERSION = "Version: "
 TEXT_1_TUTORIAL = "Bei diesem Spiel müsst ihr schnell sein. Ihr seid die Schlange im Spielfeld. Diese Schlange könnt ihr mit den Pfeiltasten steuern: rechts, links, oben und unten. \n\nIhr dürft nie den Rand des Spielfeldes berühren. Kommt ihr an den Rand, ist das Spiel sofort vorbei. \n\nZiel ist es die Punkte im Spielfeld aufzusammeln. Durch die Punkte wird die Schlange nach und nach länger und schneller.\n\n\nViel Spaß"
 
+# Make all Back button same
+BACK_BUTTON_OPTIONS = ()
+
 class Application(tk.Frame):
 	def __init__(self, master=None):
 		tk.Frame.__init__(self, master)
@@ -79,9 +82,8 @@ class Application(tk.Frame):
 		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
 		
 		# Test for background image
-		self.backgroundImage = tk.PhotoImage(file = "./data/ph/logo.gif")
-		self.backgroundImage = self.LogoImage.subsample(2, 2)
-		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage)
+		self.backgroundImage = tk.PhotoImage(file = "./data/bg.png")
+		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW)
 		
 		
 		# GameFrame lines (4 of them)
@@ -117,8 +119,8 @@ class Application(tk.Frame):
 		
 	def menu_option_tutorial_clicked(self, GameFrame):
 		self.GameFrame.delete("wmitemTag")
-		self.tutorial_text = self.GameFrame.create_text(150, 120, text=TEXT_1_TUTORIAL, font=('Calibri', '7'), fill=TEXT_COLOR, width="230", tags="tutorialItems")
-		self.zuruck_tutorial_Button = self.GameFrame.create_text(260, 265, text=LABEL_BACK, font=('Calibri', '10', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.SE, justify=tk.RIGHT)
+		self.tutorial_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.40, text=TEXT_1_TUTORIAL, font=('Calibri', '20'), fill=TEXT_COLOR, width=WINDOW_W-70, tags="tutorialItems")
+		self.zuruck_tutorial_Button = self.GameFrame.create_text(WINDOW_W*0.05, WINDOW_H*0.05, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.NW, justify=tk.RIGHT)
 		self.GameFrame.tag_bind(self.zuruck_tutorial_Button, "<Button-1>", self.zuruck_tutorial_button_clicked)		
 
 	def menu_option_about_clicked(self, GameFrame):
