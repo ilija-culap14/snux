@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  Snux 1.0.py
+#  Snux.py
 #  
-#  Copyright 2017 Ilija Culap <ilija.culap14@gmail.com>
+#  Copyright 2023 Ilija Culap <ilija.culap14@gmail.com>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ GAME_VERSION = "2.0"
 GAME_LICENCE = "GPLv3"
 AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
-WINDOW_H = 800
-WINDOW_W = 1000
+WINDOW_H = 900
+WINDOW_W = 1100
 
 ### Keys ###
 KEY_UP = "<Up>"
@@ -45,7 +45,7 @@ KEY_LEFT = "<Left>"
 
 ### Colors ###
 BG_COLOR = "black"
-TEXT_COLOR = "yellow"
+TEXT_COLOR = "white"
 SNAKE_COLOR = "#9191F8"
 FOOD_COLOR = "green"
 FRAME_COLOR = "white"
@@ -87,22 +87,27 @@ class Application(tk.Frame):
 		
 		
 		# GameFrame lines (4 of them)
-		li = [20, 20, WINDOW_W - 18, 20, 
-			  WINDOW_W - 19, 20, WINDOW_W - 19, WINDOW_H - 17, 
-			  20, WINDOW_H - 18, WINDOW_W - 19, WINDOW_H - 18, 
-			  20, 20, 20, WINDOW_H - 18]
+		li = [50, 50, WINDOW_W - 49, 50, 
+			  WINDOW_W - 49, 50, WINDOW_W - 49, WINDOW_H - 48, 
+			  50, WINDOW_H - 49, WINDOW_W - 49, WINDOW_H - 49, 
+			  50, 50, 50, WINDOW_H - 49]
 		
 		x = 0
 		for i in range(4):	
 			self.frame_line = self.GameFrame.create_line(li[x], li[x + 1], li[x + 2], li[x + 3], width=1, fill=FRAME_COLOR)
 			x += 4			
-		self.v_text = self.GameFrame.create_text(WINDOW_W - 20, WINDOW_H - 10, anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '11'), fill=TEXT_COLOR)
+		
+		# Version in bottom right corner
+		self.v_text = self.GameFrame.create_text(WINDOW_W - 20, WINDOW_H - 25, anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '11'), fill=TEXT_COLOR)
 		self.GameFrame.pack()
 
 	def welcome_menu(self):
-		self.LogoImage = tk.PhotoImage(file = "./data/ph/logo.gif")
-		self.LogoImage = self.LogoImage.subsample(2, 2)
-		self.GameName = self.GameFrame.create_image(WINDOW_W/2, WINDOW_H*0.2, image=self.LogoImage, tags="wmitemTag")
+		
+		# Hide logo for now
+		#self.LogoImage = tk.PhotoImage(file = "./data/ph/logo.gif")
+		#self.LogoImage = self.LogoImage.subsample(2, 2)
+		#self.GameName = self.GameFrame.create_image(WINDOW_W/2, WINDOW_H*0.2, image=self.LogoImage, tags="wmitemTag")
+		
 		self.newGameButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.3, text=LABEL_NEW_GAME, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
 		self.tutorialButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.4, text=LABEL_TUTORIAL, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
 		self.aboutButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.5, text=LABEL_ABOUT, font=('Calibri', '30', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="wmitemTag")
@@ -119,22 +124,25 @@ class Application(tk.Frame):
 		
 	def menu_option_tutorial_clicked(self, GameFrame):
 		self.GameFrame.delete("wmitemTag")
-		self.tutorial_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.40, text=TEXT_1_TUTORIAL, font=('Calibri', '20'), fill=TEXT_COLOR, width=WINDOW_W-70, tags="tutorialItems")
-		self.zuruck_tutorial_Button = self.GameFrame.create_text(WINDOW_W*0.05, WINDOW_H*0.05, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.NW, justify=tk.RIGHT)
+		self.tutorial_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.50, text=TEXT_1_TUTORIAL, font=('Calibri', '20'), fill=TEXT_COLOR, width=WINDOW_W-120, tags="tutorialItems")
+		self.zuruck_tutorial_Button = self.GameFrame.create_text(25, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.W, justify=tk.RIGHT)
 		self.GameFrame.tag_bind(self.zuruck_tutorial_Button, "<Button-1>", self.zuruck_tutorial_button_clicked)		
 
 	def menu_option_about_clicked(self, GameFrame):
 		self.GameFrame.delete("wmitemTag")
-		self.LogoImage = tk.PhotoImage(file = "./data/ph/logo.gif")
-		self.LogoImage = self.LogoImage.subsample(3, 3)
-		self.GameName = self.GameFrame.create_image(150, 70, image=self.LogoImage, tags="aboutItems")
-		pad = 80
-		self.t1 = self.GameFrame.create_text(30, pad + 40, text="Name des Spiels: " + GAME_NAME, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t2 = self.GameFrame.create_text(30, pad + 55, text="Spiel Version: " + GAME_VERSION, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t3 = self.GameFrame.create_text(30, pad + 70, text="Lizenz: " + GAME_LICENCE, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t4 = self.GameFrame.create_text(30, pad + 85, text="Author: " + AUTHOR, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t5 = self.GameFrame.create_text(30, pad + 100, text="Email: " + AUTHOR_EMAIL, font=('Calibri', '7'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.zuruck_about_Button = self.GameFrame.create_text(260, 265, text=LABEL_BACK, font=('Calibri', '10', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="aboutItems", anchor=tk.SE, justify=tk.RIGHT)
+		
+		# Hide image for now
+		#self.LogoImage = tk.PhotoImage(file = "./data/ph/logo.gif")
+		#self.LogoImage = self.LogoImage.subsample(3, 3)
+		#self.GameName = self.GameFrame.create_image(150, 70, image=self.LogoImage, tags="aboutItems")
+		
+		self.t1 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.40, text="Name des Spiels: " + GAME_NAME, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
+		self.t2 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.45, text="Spiel Version: " + GAME_VERSION, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
+		self.t3 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.50, text="Lizenz: " + GAME_LICENCE, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
+		self.t4 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.55, text="Author: " + AUTHOR, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
+		self.t5 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.60, text="Email: " + AUTHOR_EMAIL, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
+		
+		self.zuruck_about_Button = self.GameFrame.create_text(25, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="aboutItems", anchor=tk.W, justify=tk.RIGHT)
 		self.GameFrame.tag_bind(self.zuruck_about_Button, "<Button-1>", self.zuruck_about_button_clicked)
 		
 	def zuruck_tutorial_button_clicked(self, GameFrame):
@@ -177,10 +185,18 @@ class Application(tk.Frame):
 		self.GameFrame.delete("goScreenItem")
 		self.welcome_menu()
 	
-	def play_game(self):	
-				
-		### Create some variables ###
-		snake_index = ["1515", "1415", "1315", "1215", "1115", "1015"] 		# Start position
+	def play_game(self):
+		
+		# Calculate game grid
+		gameGridWidth = round((WINDOW_W - 140)/40)
+		gameGridHeight = round((WINDOW_H - 140)/40)
+		
+		gridOriginX = WINDOW_W / 2 - (gameGridWidth * 20)
+		gridOriginY = WINDOW_H / 2 - (gameGridHeight * 20)
+
+		# Snake index
+		snake_index = [10, 11, 9, 11, 8, 11, 7, 11, 6, 11, 5, 11]
+		
 		snake_tail = 5
 		snake_points = 0
 		snake_level = 1
@@ -192,17 +208,24 @@ class Application(tk.Frame):
 		food_eaten = 0
 		
 		def create_head():
-			x = (int(snake_index[0][:2]) * 5) + 15
-			y = (int(snake_index[0][-2:]) * 5) + 15
-			self.snake_head_object = self.GameFrame.create_line(x + 1, y + 3, x + 6, y + 3, width=5, fill=SNAKE_COLOR, tags="gameItems")			
-
+			# Snake Head, new
+			# Snake width is 24px
+			self.snake_head_object = self.GameFrame.create_oval(gridOriginX + (snake_index[0]*40) - 32, 
+																	 gridOriginY + (snake_index[1]*40) - 32, 
+																	 gridOriginX + (snake_index[0]*40) - 8, 
+																	 gridOriginY + (snake_index[1]*40) - 8, 
+																	 fill="white", tags=("gameItems"))
+																	 
 		def create_tail():
 			t = 1
 			for i in range(snake_tail):
-				x = (int(snake_index[t][:2]) * 5) + 15
-				y = (int(snake_index[t][-2:]) * 5) + 15
-				self.snake_tail_object = self.GameFrame.create_line(x + 1, y + 3, x + 6, y + 3, fill=SNAKE_COLOR, width=5, tags=("tailItems", "gameItems"))
-				t += 1
+				self.snake_tail_object = self.GameFrame.create_oval(gridOriginX + (snake_index[t+1]*40) - 32, 
+																	gridOriginY + (snake_index[t+2]*40) - 32, 
+																	gridOriginX + (snake_index[t+1]*40) - 8, 
+																	gridOriginY + (snake_index[t+2]*40) - 8, 
+																	fill="yellow", tags=("tailItems", "gameItems"))
+																	 
+				t += 2
 				
 		def create_food():
 			x = (randint(1, 52) * 5) + 15
@@ -222,7 +245,15 @@ class Application(tk.Frame):
 				if len(str(y)) == 1:
 					y = "0" + str(y)
 				xy = str(x) + str(y)		
-			self.food_object = self.GameFrame.create_line(x + 1, y + 3, x + 6, y + 3, width=5, fill=FOOD_COLOR, tags=("foodItem", "gameItems"))
+				
+			### Need work
+			
+			self.food_object = self.GameFrame.create_oval(gridOriginX + (snake_index[t+1]*40) - 32, 
+																	gridOriginY + (snake_index[t+2]*40) - 32, 
+																	gridOriginX + (snake_index[t+1]*40) - 8, 
+																	gridOriginY + (snake_index[t+2]*40) - 8, 
+																	fill="yellow", tags=("foodItems", "gameItems"))
+			
 		
 		def delete_food():
 			self.GameFrame.delete("foodItem")
@@ -256,6 +287,9 @@ class Application(tk.Frame):
 			return distance
 
 		def update_index():
+			
+			### Need work
+			
 			x = str((int(str(self.GameFrame.coords(self.snake_head_object)[0] - 1).replace(".0","")) - 15) / 5).replace(".0","")
 			y = str((int(str(self.GameFrame.coords(self.snake_head_object)[1] - 3).replace(".0","")) - 15) / 5).replace(".0","")
 			if len(str(x)) == 1:
@@ -264,6 +298,8 @@ class Application(tk.Frame):
 				y = "0" + str(y)
 			z = str(x) + str(y)
 			snake_index.insert(0, z)
+			
+			
 			if snake_tail == len(snake_index) - 1:
 				pass
 			else:
@@ -319,9 +355,10 @@ class Application(tk.Frame):
 
 		self.score_text = self.GameFrame.create_text(20, 9, anchor=tk.W, justify=tk.LEFT, text=LABEL_SCORE + str(snake_points).replace(".0",""), font=('Calibri', '7', "bold"), fill=TEXT_COLOR)
 		self.level_text = self.GameFrame.create_text(280, 9, anchor=tk.E, justify=tk.RIGHT, text=LABEL_LEVEL + str(define_level(snake_tail)), font=('Calibri', '7', "bold"), fill=TEXT_COLOR, tags="gameItems")	
-		create_food()
+		#create_food()
 		create_head()
-
+		create_tail()
+		
 		while True:
 			
 			self.GameFrame.focus_set()				
@@ -333,12 +370,12 @@ class Application(tk.Frame):
 			self.GameFrame.after(define_speed(food_eaten))
 			moves += 1			
 			bind_keys()
-			
-			# Define Game Over		
+
+			# Define Game Over >>>> need work
 			if int(get_x_head()) > 280 or int(get_y_head()) > 280 or int(get_y_head()) < 20 or int(get_x_head()) < 20 or snake_index.count(snake_index[0]) == 2:
 				self.game_over()
 				break
-			
+
 			# If the food is eaten
 			if self.GameFrame.coords(self.snake_head_object)[:2] == self.GameFrame.coords(self.food_object)[:2]:
 				distance = min_distance(self.food_op[0], self.food_op[1], self.food_np[0], self.food_np[1])
@@ -363,6 +400,7 @@ class Application(tk.Frame):
 
 			self.GameFrame.delete("tailItems")	
 			update_index()
+	
 	
 	def quit_game(self, root):
 		self.quit()	
