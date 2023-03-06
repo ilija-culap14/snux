@@ -125,8 +125,8 @@ class Application(tk.Frame):
 	def menu_option_tutorial_clicked(self, GameFrame):
 		self.GameFrame.delete("wmitemTag")
 		self.tutorial_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.50, text=TEXT_1_TUTORIAL, font=('Calibri', '20'), fill=TEXT_COLOR, width=WINDOW_W-120, tags="tutorialItems")
-		self.zuruck_tutorial_Button = self.GameFrame.create_text(25, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.W, justify=tk.RIGHT)
-		self.GameFrame.tag_bind(self.zuruck_tutorial_Button, "<Button-1>", self.zuruck_tutorial_button_clicked)		
+		self.back_Button = self.GameFrame.create_text(25, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.W, justify=tk.RIGHT)
+		self.GameFrame.tag_bind(self.back_Button, "<Button-1>", self.goto_MainMenu)		
 
 	def menu_option_about_clicked(self, GameFrame):
 		self.GameFrame.delete("wmitemTag")
@@ -143,27 +143,24 @@ class Application(tk.Frame):
 		self.t5 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.60, text="Email: " + AUTHOR_EMAIL, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		
 		self.zuruck_about_Button = self.GameFrame.create_text(25, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="aboutItems", anchor=tk.W, justify=tk.RIGHT)
-		self.GameFrame.tag_bind(self.zuruck_about_Button, "<Button-1>", self.zuruck_about_button_clicked)
-		
-	def zuruck_tutorial_button_clicked(self, GameFrame):
-		self.GameFrame.delete("tutorialItems")
-		self.welcome_menu()
-		
-	def zuruck_about_button_clicked(self, GameFrame):
-		self.GameFrame.delete("aboutItems")
-		self.welcome_menu()
+		self.GameFrame.tag_bind(self.zuruck_about_Button, "<Button-1>", self.goto_MainMenu)
 
-	def game_over(self):
+	def game_over(self): #### Need work
+		
+		# Remove everything from the screen
 		self.GameFrame.delete("gameItems")
-		self.game_over_text = self.GameFrame.create_text(150, 150, text=LABEL_GAME_OVER, font=('Calibri', '14', "bold"), fill=GAME_OVER_LABEL_COLOR, tags="goScreenItem")
-		self.newGameButton_1 = self.GameFrame.create_text(150, 190, text=LABEL_NEW_GAME, font=('Calibri', '9', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.welcomeMenuButton = self.GameFrame.create_text(150, 210, text=LABEL_MAIN_MENU, font=('Calibri', '9', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.quitButton_1 = self.GameFrame.create_text(150, 230, text=LABEL_QUIT, font=('Calibri', '9', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.ng_a_go)
-		self.GameFrame.tag_bind(self.welcomeMenuButton, "<Button-1>", self.wm_a_go)
+		
+		# Text
+		self.game_over_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.3, text=LABEL_GAME_OVER, font=('Calibri', '30', "bold"), fill=GAME_OVER_LABEL_COLOR, tags="goScreenItem")
+		self.newGameButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.45, text=LABEL_NEW_GAME, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
+		self.welcomeMenuButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.5, text=LABEL_MAIN_MENU, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
+		self.quitButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.55, text=LABEL_QUIT, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
+		
+		# Bind buttons
+		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.goto_PlayGame)
+		self.GameFrame.tag_bind(self.welcomeMenuButton, "<Button-1>", self.goto_MainMenu)
 		self.GameFrame.tag_bind(self.quitButton_1, "<Button-1>", self.quit_game)
-		self.GameFrame.itemconfigure(self.score_text, font=('Calibri', '11'), anchor=tk.CENTER, justify=tk.CENTER, tags="goScreenItem")
-		self.GameFrame.move(self.score_text, 130, 90)
+
 		
 	def game_win(self):
 		self.GameFrame.delete("gameItems")
@@ -171,19 +168,25 @@ class Application(tk.Frame):
 		self.newGameButton_1 = self.GameFrame.create_text(150, 190, text=LABEL_NEW_GAME, font=('Calibri', '9', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
 		self.welcomeMenuButton = self.GameFrame.create_text(150, 210, text=LABEL_MAIN_MENU, font=('Calibri', '9', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
 		self.quitButton_1 = self.GameFrame.create_text(150, 230, text=LABEL_QUIT, font=('Calibri', '9', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.ng_a_go)
-		self.GameFrame.tag_bind(self.welcomeMenuButton, "<Button-1>", self.wm_a_go)
+		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.goto_PlayGame)
+		self.GameFrame.tag_bind(self.welcomeMenuButton, "<Button-1>", self.goto_MainMenu)
 		self.GameFrame.tag_bind(self.quitButton_1, "<Button-1>", self.quit_game)
 		self.GameFrame.itemconfigure(self.score_text, font=('Calibri', '11'), anchor=tk.CENTER, justify=tk.CENTER, tags="goScreenItem")
 		self.GameFrame.move(self.score_text, 130, 90)
-
-	def ng_a_go(self, GameFrame): # New game after game over
-		self.GameFrame.delete("goScreenItem")
-		self.play_game()
 		
-	def wm_a_go(self, GameFrame): # Welcome menu after game over
+	def goto_MainMenu(self, GameFrame):
 		self.GameFrame.delete("goScreenItem")
+		self.GameFrame.delete("aboutItems")
+		self.GameFrame.delete("aboutItems")
+		self.GameFrame.delete("tutorialItems")
 		self.welcome_menu()
+		
+	def goto_PlayGame(self, GameFrame):
+		self.GameFrame.delete("goScreenItem")
+		self.GameFrame.delete("aboutItems")
+		self.GameFrame.delete("aboutItems")
+		self.GameFrame.delete("tutorialItems")
+		self.play_game()
 	
 	def play_game(self):
 		
@@ -191,16 +194,18 @@ class Application(tk.Frame):
 		gameGridWidth = round((WINDOW_W - 140)/40)
 		gameGridHeight = round((WINDOW_H - 140)/40)
 		
+		# Set grid origins
 		gridOriginX = WINDOW_W / 2 - (gameGridWidth * 20)
 		gridOriginY = WINDOW_H / 2 - (gameGridHeight * 20)
 
 		# Snake index
 		snake_index = [10, 11, 9, 11, 8, 11, 7, 11, 6, 11, 5, 11]
 		
+		# Some vars for game
 		snake_tail = 5
 		snake_points = 0
 		snake_level = 1
-		self.dir_x = 5
+		self.dir_x = 40
 		self.dir_y = 0
 		self.food_np = [0,0]
 		self.food_op = [15, 15]
@@ -253,8 +258,7 @@ class Application(tk.Frame):
 																	gridOriginX + (snake_index[t+1]*40) - 8, 
 																	gridOriginY + (snake_index[t+2]*40) - 8, 
 																	fill="yellow", tags=("foodItems", "gameItems"))
-			
-		
+				
 		def delete_food():
 			self.GameFrame.delete("foodItem")
 		
@@ -288,57 +292,44 @@ class Application(tk.Frame):
 
 		def update_index():
 			
-			### Need work
+			# Get the position where the snake head is	
+			xField = (self.GameFrame.coords(self.snake_head_object)[0] - 38) / 40
+			yField = (self.GameFrame.coords(self.snake_head_object)[1] - 38) / 40
 			
-			x = str((int(str(self.GameFrame.coords(self.snake_head_object)[0] - 1).replace(".0","")) - 15) / 5).replace(".0","")
-			y = str((int(str(self.GameFrame.coords(self.snake_head_object)[1] - 3).replace(".0","")) - 15) / 5).replace(".0","")
-			if len(str(x)) == 1:
-				x = "0" + str(x)
-			if len(str(y)) == 1:
-				y = "0" + str(y)
-			z = str(x) + str(y)
-			snake_index.insert(0, z)
+			# Put those field in snake_index
+			snake_index.insert(0, yField)
+			snake_index.insert(0, xField)
 			
-			
-			if snake_tail == len(snake_index) - 1:
+			"""
+			# I do not know what this is
+			if snake_tail*2 == len(snake_index):
 				pass
 			else:
 				snake_index.pop(snake_tail + 1)
-			
-		def get_x_head():
-			x = str(self.GameFrame.coords(self.snake_head_object)[0]).replace(".0","")
-			if len(str(x)) == 1:
-				x = "0" + str(x)
-			return x
-		
-		def get_y_head():
-			y = str(self.GameFrame.coords(self.snake_head_object)[1]).replace(".0","")
-			if len(str(y)) == 1:
-				y = "0" + str(y)
-			return y
+			"""
 		
 		def arrow_key_up(event):
 			unbind_keys()
-			if (self.dir_x == 5 and self.dir_y == 0) or (self.dir_x == -5 and self.dir_y == 0):
+			if (self.dir_x == 40 and self.dir_y == 0) or (self.dir_x == -40 and self.dir_y == 0):
 				self.dir_x = 0
-				self.dir_y = -5
+				self.dir_y = -40
 				
 		def arrow_key_down(event):
 			unbind_keys()
-			if (self.dir_x == 5 and self.dir_y == 0) or (self.dir_x == -5 and self.dir_y == 0):
+			if (self.dir_x == 40 and self.dir_y == 0) or (self.dir_x == -40 and self.dir_y == 0):
 				self.dir_x = 0
-				self.dir_y = 5
+				self.dir_y = 40
 				
 		def arrow_key_left(event):
 			unbind_keys()
-			if (self.dir_x == 0 and self.dir_y == -5) or (self.dir_x == 0 and self.dir_y == 5):
-				self.dir_x = -5
+			if (self.dir_x == 0 and self.dir_y == -40) or (self.dir_x == 0 and self.dir_y == 40):
+				self.dir_x = -40
 				self.dir_y = 0
 				
 		def arrow_key_right(event):
 			unbind_keys()
-			if (self.dir_x == 0 and self.dir_y == -5) or (self.dir_x == 0 and self.dir_y == 5):
-				self.dir_x = 5
+			if (self.dir_x == 0 and self.dir_y == -40) or (self.dir_x == 0 and self.dir_y == 40):
+				self.dir_x = 40
 				self.dir_y = 0
 		
 		def bind_keys():
@@ -353,11 +344,10 @@ class Application(tk.Frame):
 			self.GameFrame.unbind(KEY_LEFT)
 			self.GameFrame.unbind(KEY_RIGHT)
 
-		self.score_text = self.GameFrame.create_text(20, 9, anchor=tk.W, justify=tk.LEFT, text=LABEL_SCORE + str(snake_points).replace(".0",""), font=('Calibri', '7', "bold"), fill=TEXT_COLOR)
-		self.level_text = self.GameFrame.create_text(280, 9, anchor=tk.E, justify=tk.RIGHT, text=LABEL_LEVEL + str(define_level(snake_tail)), font=('Calibri', '7', "bold"), fill=TEXT_COLOR, tags="gameItems")	
-		#create_food()
+		# self.score_text = self.GameFrame.create_text(20, 9, anchor=tk.W, justify=tk.LEFT, text=LABEL_SCORE + str(snake_points).replace(".0",""), font=('Calibri', '7', "bold"), fill=TEXT_COLOR)
+		# self.level_text = self.GameFrame.create_text(280, 9, anchor=tk.E, justify=tk.RIGHT, text=LABEL_LEVEL + str(define_level(snake_tail)), font=('Calibri', '7', "bold"), fill=TEXT_COLOR, tags="gameItems")	
+		# create_food()
 		create_head()
-		create_tail()
 		
 		while True:
 			
@@ -367,15 +357,17 @@ class Application(tk.Frame):
 			create_tail()
 			root.update()
 			self.GameFrame.move(self.snake_head_object, self.dir_x, self.dir_y)
-			self.GameFrame.after(define_speed(food_eaten))
+			self.GameFrame.after(80)
+			
 			moves += 1			
 			bind_keys()
 
 			# Define Game Over >>>> need work
-			if int(get_x_head()) > 280 or int(get_y_head()) > 280 or int(get_y_head()) < 20 or int(get_x_head()) < 20 or snake_index.count(snake_index[0]) == 2:
+			if snake_index[0] == 0 or snake_index[0] > gameGridWidth or snake_index[1] == 0 or snake_index[1] > gameGridHeight:
 				self.game_over()
 				break
 
+			"""
 			# If the food is eaten
 			if self.GameFrame.coords(self.snake_head_object)[:2] == self.GameFrame.coords(self.food_object)[:2]:
 				distance = min_distance(self.food_op[0], self.food_op[1], self.food_np[0], self.food_np[1])
@@ -397,7 +389,8 @@ class Application(tk.Frame):
 					break
 				delete_food()
 				create_food()
-
+			"""
+			
 			self.GameFrame.delete("tailItems")	
 			update_index()
 	
