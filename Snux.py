@@ -27,6 +27,10 @@ except ImportError:
 	import tkinter as tk
 
 from random import randint
+from PIL import Image as pilimage
+from PIL import ImageDraw as pildraw
+from PIL import ImageFont as pilfont
+from PIL import ImageTk
 
 ### Game relevant ###
 GAME_NAME = "Snux"
@@ -36,6 +40,7 @@ AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
 WINDOW_H = 900
 WINDOW_W = 1200
+FONTFILE = ("./data/Font.ttf")
 
 ### Keys ###
 KEY_UP = "<Up>"
@@ -71,9 +76,30 @@ TEXT_1_TUTORIAL = "Bei diesem Spiel müsst ihr schnell sein. Ihr seid die Schlan
 class Application(tk.Frame):
 	def __init__(self, master=None):
 		tk.Frame.__init__(self, master)
+		self.imgObjects = []
 		self.pack()
 		self.create_gameframe()
 		self.welcome_menu()
+		
+	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=()):
+		## Create Font
+		font = pilfont.truetype(fontfile, size)
+		
+		## Create image
+		img1 = pilimage.new("RGBA", font.getsize(text), "#00000000")
+	
+		## Add Text to image
+		pildraw.Draw(img1).text((0, 0), text, fill, font=font)
+		
+		## Convert image to Photoimage
+		imgext = ImageTk.PhotoImage(img1)
+		self.imgObjects.append(imgext)
+		
+		## Show image
+		self.imgdraw = canvas.create_image(x, y - round(img1.size[1]/size), image=imgext, anchor=anchor, tags=tags)
+
+		
+		
 		
 	def create_gameframe(self):
 		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
@@ -145,8 +171,11 @@ class Application(tk.Frame):
 		# Remove everything from the screen
 		self.GameFrame.delete("gameItems")
 		
-		# Text
-		self.game_over_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.3, text=LABEL_GAME_OVER, font=('Calibri', '30', "bold"), fill=GAME_OVER_LABEL_COLOR, tags="goScreenItem")
+		# Text		
+		# New text with PIL
+		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.3, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE, size=50, anchor=tk.CENTER, tags="goScreenItem")
+		
+		# Menu
 		self.newGameButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.45, text=LABEL_NEW_GAME, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
 		self.welcomeMenuButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.5, text=LABEL_MAIN_MENU, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
 		self.quitButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.55, text=LABEL_QUIT, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
