@@ -139,6 +139,9 @@ class Application(tk.Frame):
 
 	def game_over(self): #### Need work
 		
+		# Show cursor, need to add it at game_win
+		root.config(cursor="arrow")
+		
 		# Remove everything from the screen
 		self.GameFrame.delete("gameItems")
 		
@@ -152,7 +155,6 @@ class Application(tk.Frame):
 		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.goto_PlayGame)
 		self.GameFrame.tag_bind(self.welcomeMenuButton, "<Button-1>", self.goto_MainMenu)
 		self.GameFrame.tag_bind(self.quitButton_1, "<Button-1>", self.quit_game)
-
 		
 	def game_win(self):
 		self.GameFrame.delete("gameItems")
@@ -182,6 +184,7 @@ class Application(tk.Frame):
 		self.play_game()
 	
 	def play_game(self):
+		root.config(cursor="none")
 		
 		# Calculate game grid
 		gameGridWidth = round((WINDOW_W - 142)/40)
@@ -199,15 +202,14 @@ class Application(tk.Frame):
 		
 		# Some vars for game
 		snake_tail = 5
-		snake_points = 0
 		snake_level = 1
+		
+		# Movement vars for the snake
 		self.dir_x = 40
 		self.dir_y = 0
-		moves = 0
-		food_eaten = 0
 		
 		def create_head():
-			# Snake Head, new
+			
 			# Snake width is 24px
 			self.snake_head_object = self.GameFrame.create_oval(gridOriginX + (snake_index[0]*40) - 32, 
 																	 gridOriginY + (snake_index[1]*40) - 32, 
@@ -233,23 +235,33 @@ class Application(tk.Frame):
 			food_index.insert(0, randint(1, gameGridHeight))
 			food_index.insert(0, randint(1, gameGridWidth))
 			
+			"""
 			# Draw food
 			self.food_object = self.GameFrame.create_oval(gridOriginX + (food_index[0]*40) - 32, 
 																	 gridOriginY + (food_index[1]*40) - 32, 
 																	 gridOriginX + (food_index[0]*40) - 8, 
 																	 gridOriginY + (food_index[1]*40) - 8,
 																		fill="blue", tags=("foodItem", "gameItems"))
+																	
+			"""
+			
+			# Testing image as food
+			self.foodImage = tk.PhotoImage(file = "./data/food.png")
+			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index[0]*40), 
+																	 gridOriginY + (food_index[1]*40), anchor=tk.SE,image=self.foodImage, 
+																	 tags=("foodItem", "gameItems"))
 				
 
-		def food_energy():
-			pass
+		def food_energy(snake_points):
+			snake_points += randint(1, 15)
+			snake_points += randint(0, 22)
+			return snake_points
 		
 		def define_level(x):
-			if x < 15:
-				snake_level = 1
-			else:
-				snake_level = str(round((x + 5) / 10)).replace(".0", "")
-			return snake_level
+			
+			# Bumb level up for 5 eaten food
+			level = round((x/5) - 0.49)
+			return level
 
 		def update_index():
 			
@@ -260,6 +272,19 @@ class Application(tk.Frame):
 			# Put those field in snake_index
 			snake_index.insert(0, round(yField))
 			snake_index.insert(0, round(xField))
+			
+		def checkGameOver():
+			
+			# If snake touches the edge
+			if snake_index[0] == 0 or snake_index[0] > gameGridWidth or snake_index[1] == 0 or snake_index[1] > gameGridHeight:
+				self.game_over()
+				return True
+			
+			# If snake head touches snake tail
+			for x in range(1, snake_tail + 1):
+				if snake_index[0] == snake_index[x*2] and snake_index[1] == snake_index[(x*2)+1]:
+					self.game_over()
+					return True
 		
 		def arrow_key_up(event):
 			unbind_keys()
@@ -285,60 +310,66 @@ class Application(tk.Frame):
 				self.dir_x = 40
 				self.dir_y = 0
 		
-		def bind_keys():
-			self.GameFrame.bind(KEY_UP, arrow_key_up)
-			self.GameFrame.bind(KEY_DOWN, arrow_key_down)
-			self.GameFrame.bind(KEY_LEFT, arrow_key_left)
-			self.GameFrame.bind(KEY_RIGHT, arrow_key_right)
-		
 		def unbind_keys():
 			self.GameFrame.unbind(KEY_UP)
 			self.GameFrame.unbind(KEY_DOWN)
 			self.GameFrame.unbind(KEY_LEFT)
 			self.GameFrame.unbind(KEY_RIGHT)
 
-		self.score_text = self.GameFrame.create_text(50, 25, anchor=tk.W, justify=tk.CENTER, text=LABEL_SCORE + str(snake_points).replace(".0",""), font=('Calibri', '15', 'bold'), fill=TEXT_COLOR)
-		self.level_text = self.GameFrame.create_text(WINDOW_W/2, 25, anchor=tk.CENTER, justify=tk.CENTER, text=str(define_level(snake_tail)), font=('Calibri', '15', "bold"), fill=TEXT_COLOR, tags="gameItems")	
+		self.score_text = self.GameFrame.create_text(50, 25, anchor=tk.W, justify=tk.CENTER, text=LABEL_SCORE + "0", font=('Calibri', '15', 'bold'), fill=TEXT_COLOR, tags="gameItems")
+		self.level_text = self.GameFrame.create_text(WINDOW_W - 50, 25, anchor=tk.E, justify=tk.CENTER, text=LABEL_LEVEL + str(define_level(snake_tail)), font=('Calibri', '15', "bold"), fill=TEXT_COLOR, tags="gameItems")
 		create_food()
 		create_head()
 		
 		while True:
 			
-			self.GameFrame.focus_set()	
-			bind_keys()			
+			self.GameFrame.focus_set()
 			
-			# Show tail, wait, move head and remove tail
+			# Check for game over
+			if checkGameOver() == True:
+				break	
+			
+			# Bind keys
+			self.GameFrame.bind(KEY_UP, arrow_key_up)
+			self.GameFrame.bind(KEY_DOWN, arrow_key_down)
+			self.GameFrame.bind(KEY_LEFT, arrow_key_left)
+			self.GameFrame.bind(KEY_RIGHT, arrow_key_right)		
+			
+			# Show tail and move head
 			create_tail()
 			root.update()
-			self.GameFrame.move(self.snake_head_object, self.dir_x, self.dir_y)
-			create_tail()
-
-			# Define Game Over >>>> need work
-			if snake_index[0] == 0 or snake_index[0] > gameGridWidth or snake_index[1] == 0 or snake_index[1] > gameGridHeight:
-				self.game_over()
-				break
+			self.GameFrame.move(self.snake_head_object, self.dir_x, self.dir_y)		
 			
-			self.GameFrame.after(75)
-			bind_keys()	
+			# Wait for next move
+			# Snake speed is derived from lenght of snake tail
+			self.GameFrame.after(100 - round(snake_tail/3))
 
 			# If the food is eaten
 			if snake_index[0] == food_index[0] and snake_index[1] == food_index[1]:
 				self.GameFrame.delete("foodItem")
-				snake_points += 1
+				
 				snake_tail += 1
-				food_eaten += 1
+				
+				# Update score and points
+				self.GameFrame.itemconfigure(self.score_text, text=LABEL_SCORE + str(food_energy(snake_tail)))
+				self.GameFrame.itemconfigure(self.level_text, text=LABEL_LEVEL + str(define_level(snake_tail)))
+				
+				# Create new food
 				create_food()
 				
 			update_index()
-			bind_keys()
 	
 	def quit_game(self, root):
 		self.quit()	
 			
 if __name__ == '__main__':
 	root = tk.Tk()
+	
+	# Set window size and make it unresizeable
 	root.geometry(str(WINDOW_W) + "x" + str(WINDOW_H))
 	root.resizable(width=False, height=False)
+	
+	# Start application
 	app = Application(root)
 	app.master.title(GAME_NAME)
 	root.mainloop()
