@@ -40,7 +40,11 @@ AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
 WINDOW_H = 900
 WINDOW_W = 1200
-FONTFILE = ("./data/Font.ttf")
+
+# Font files
+FONTFILE_GAMEOVER = ("./data/fonts/gameover.ttf")
+FONTFILE_TUTORIAL = ("./data/fonts/tutorial.ttf")
+FONTFILE_BACK = ("./data/fonts/back.ttf")
 
 ### Keys ###
 KEY_UP = "<Up>"
@@ -71,37 +75,85 @@ LABEL_BACK = "Zurück"
 LABEL_SCORE = "Punkte: "
 LABEL_LEVEL = "Level: "
 LABEL_VERSION = "Version: "
-TEXT_1_TUTORIAL = "Bei diesem Spiel müsst ihr schnell sein. Ihr seid die Schlange im Spielfeld. Diese Schlange könnt ihr mit den Pfeiltasten steuern: rechts, links, oben und unten. \n\nIhr dürft nie den Rand des Spielfeldes berühren. Kommt ihr an den Rand, ist das Spiel sofort vorbei. \n\nZiel ist es die Punkte im Spielfeld aufzusammeln. Durch die Punkte wird die Schlange nach und nach länger und schneller.\n\n\nViel Spaß"
+TEXT_1_TUTORIAL = "Bei diesem Spiel müsst ihr schnell sein. Ihr seid die Schlange im Spielfeld. Diese Schlange könnt ihr mit den Pfeiltasten steuern: rechts, links, oben und unten. Ihr dürft nie den Rand des Spielfeldes berühren. Kommt ihr an den Rand, ist das Spiel sofort vorbei. Ziel ist es die Punkte im Spielfeld aufzusammeln. Durch die Punkte wird die Schlange nach und nach länger und schneller.\n\n\nViel Spaß"
 
 class Application(tk.Frame):
 	def __init__(self, master=None):
 		tk.Frame.__init__(self, master)
 		self.imgObjects = []
 		self.pack()
-		self.create_gameframe()
+		self.createGameFrame()
 		self.welcome_menu()
 		
-	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=()):
-		## Create Font
+	def createMainMenuItem(self, canvas, x, y, anchor="center", tags=(), img_leave="", img_enter="", gotoFunc=0):
+		pass
+		
+	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
+		
+		# Create Font
 		font = pilfont.truetype(fontfile, size)
+
+		# Check if the text is multilined
+		# get line lenght in char for given width
+		if ml == True:
+			oneCharWidth = font.getlength("O")
+			numberOfChar = round(width/oneCharWidth)			
+			
+			words = text.split()
+			lineOfText = ""
+			text_new = ""		
+			for word in words:
+				if len(lineOfText) < numberOfChar+3 and len(lineOfText) >= numberOfChar-7:
+					text_new += lineOfText
+					text_new += "\n"
+					lineOfText = ""
+				lineOfText += word + " "
+			text_new += lineOfText
+			
+			numberOfLines = text_new.count("\n")
+			text = text_new
+			
+			# Find longest line and adjust the width of the widget
+			ll = 0
+			for line in text.splitlines():
+				cl = int(font.getlength(line))
+				if cl > ll:
+					ll = cl
+					longestline = line
+					imageWidth = ll
+			
+		else:
+			# Set width of the line
+			imageWidth = int(font.getlength(text))
+			
+			# Set number of lines to 1
+			numberOfLines = 1
 		
-		## Create image
-		img1 = pilimage.new("RGBA", font.getsize(text), "#00000000")
+		# Calculate image height
+		imageHeight = (font.getbbox("Fj", anchor='lt')[3]) * numberOfLines
+		imageHeight += (spacing * numberOfLines)
+		imageHeight = int(imageHeight * 1.1)
 	
-		## Add Text to image
-		pildraw.Draw(img1).text((0, 0), text, fill, font=font)
+		# Create image
+		img1 = pilimage.new("RGBA", (imageWidth, imageHeight), "#00000000")
+			
+		# Add Text to image
+		pildraw.Draw(img1).multiline_text((0, 0), text, fill, font=font, spacing=spacing, align="center")
 		
-		## Convert image to Photoimage
+		# Convert image to Photoimage
 		imgext = ImageTk.PhotoImage(img1)
 		self.imgObjects.append(imgext)
 		
-		## Show image
-		self.imgdraw = canvas.create_image(x, y - round(img1.size[1]/size), image=imgext, anchor=anchor, tags=tags)
-
+		objectID = "OID-" + str(randint(1, 5000))
+		tags_out = (tags, objectID)
+				
+		# Show image
+		self.imgdraw = canvas.create_image(x, y - round(img1.size[1]/size), image=imgext, anchor=anchor, tags=tags_out)
 		
+		if bind == True:
+			self.GameFrame.tag_bind(objectID, "<Button-1>", bindfunc)
 		
-		
-	def create_gameframe(self):
+	def createGameFrame(self):
 		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
 		
 		# Background image
@@ -141,27 +193,27 @@ class Application(tk.Frame):
 		self.GameFrame.tag_bind(self.quitButton, "<Button-1>", self.quit_game)
 		
 	def goto_Tutorial(self, GameFrame):
+		
+		# Remove everything from screen
 		self.GameFrame.delete("wmitemTag")
-		self.tutorial_text = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.50, text=TEXT_1_TUTORIAL, font=('Calibri', '20'), fill=TEXT_COLOR, width=WINDOW_W-120, tags="tutorialItems")
-		self.back_Button = self.GameFrame.create_text(50, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="tutorialItems", anchor=tk.W, justify=tk.RIGHT)
-		self.GameFrame.tag_bind(self.back_Button, "<Button-1>", self.goto_MainMenu)		
-
+		
+		# Tutorial Text through new font system
+		self.tutorial_text = self.createTextExt(self.GameFrame, x=WINDOW_W/2, y=WINDOW_H/2, text=TEXT_1_TUTORIAL, fill=TEXT_COLOR, fontfile=FONTFILE_TUTORIAL, size=40, anchor="center", tags="tutorialItems", ml=True, width=WINDOW_W-110, spacing=25)
+		
+		# Back button
+		self.back_Button = self.createTextExt(self.GameFrame, x=50, y=25, text=LABEL_BACK, fill=TEXT_COLOR, fontfile=FONTFILE_BACK, size=20, anchor="w", tags="tutorialItems", bind=True, bindfunc=self.goto_MainMenu)
+		
 	def goto_About(self, GameFrame):
 		self.GameFrame.delete("wmitemTag")
-		
-		# Hide image for now
-		#self.LogoImage = tk.PhotoImage(file = "./data/ph/logo.gif")
-		#self.LogoImage = self.LogoImage.subsample(3, 3)
-		#self.GameName = self.GameFrame.create_image(150, 70, image=self.LogoImage, tags="aboutItems")
-		
+			
 		self.t1 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.40, text="Name des Spiels: " + GAME_NAME, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.t2 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.45, text="Spiel Version: " + GAME_VERSION, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.t3 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.50, text="Lizenz: " + GAME_LICENCE, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.t4 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.55, text="Author: " + AUTHOR, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		self.t5 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.60, text="Email: " + AUTHOR_EMAIL, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
 		
-		self.back_Button = self.GameFrame.create_text(50, 25, text=LABEL_BACK, font=('Calibri', '20', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="aboutItems", anchor=tk.W, justify=tk.RIGHT)
-		self.GameFrame.tag_bind(self.back_Button, "<Button-1>", self.goto_MainMenu)
+		# Back button
+		self.back_Button = self.createTextExt(self.GameFrame, x=50, y=25, text=LABEL_BACK, fill=TEXT_COLOR, fontfile=FONTFILE_BACK, size=20, anchor="w", tags="aboutItems", bind=True, bindfunc=self.goto_MainMenu)
 
 	def game_over(self): #### Need work
 		
@@ -173,7 +225,7 @@ class Application(tk.Frame):
 		
 		# Text		
 		# New text with PIL
-		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.3, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE, size=80, anchor=tk.CENTER, tags="goScreenItem")
+		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.3, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
 		
 		# Menu
 		self.newGameButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.45, text=LABEL_NEW_GAME, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
