@@ -40,6 +40,7 @@ AUTHOR = "Ilija Culap"
 AUTHOR_EMAIL = "ilija.culap14@gmail.com"
 WINDOW_H = 900
 WINDOW_W = 1200
+FRAME_OFFSET = 50
 
 # Font files
 FONTFILE_GAMEOVER = ("./data/fonts/gameover.ttf")
@@ -161,20 +162,15 @@ class Application(tk.Frame):
 		# Background image
 		self.backgroundImage = tk.PhotoImage(file = "./data/bg.png")
 		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW)
-		
-		# GameFrame lines (4 of them)
-		li = [50, 50, WINDOW_W - 49, 50, 
-			  WINDOW_W - 49, 50, WINDOW_W - 49, WINDOW_H - 48, 
-			  50, WINDOW_H - 49, WINDOW_W - 49, WINDOW_H - 49, 
-			  50, 50, 50, WINDOW_H - 49]
-		
-		x = 0
-		for i in range(4):	
-			self.frame_line = self.GameFrame.create_line(li[x], li[x + 1], li[x + 2], li[x + 3], width=1, fill=FRAME_COLOR)
-			x += 4			
-		
+
+		# Draw 4 lines
+		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, width=1, fill=FRAME_COLOR)
+		self.frame_line = self.GameFrame.create_line(WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 2, width=1, fill=FRAME_COLOR)
+		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
+		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
+
 		# Version in bottom right corner
-		self.v_text = self.GameFrame.create_text(WINDOW_W - 50, WINDOW_H - 25, anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '11'), fill=TEXT_COLOR)
+		self.v_text = self.GameFrame.create_text(WINDOW_W - FRAME_OFFSET, WINDOW_H - (FRAME_OFFSET/2), anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '11'), fill=TEXT_COLOR)
 		self.GameFrame.pack()
 
 	def welcome_menu(self):
@@ -225,14 +221,16 @@ class Application(tk.Frame):
 		# Remove everything from the screen
 		self.GameFrame.delete("gameItems")
 		
-		# Text		
-		# New text with PIL
-		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.3, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
+		# Score
+		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.4, text=LABEL_SCORE + str(self.snakePoints), fill="grey", fontfile=FONTFILE_BACK, size=50, anchor=tk.CENTER, tags="goScreenItem")
+
+		# Game over text
+		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.15, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
 		
 		# Menu
-		self.newGameButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.45, text=LABEL_NEW_GAME, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.welcomeMenuButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.5, text=LABEL_MAIN_MENU, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.quitButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.55, text=LABEL_QUIT, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
+		self.newGameButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
+		self.welcomeMenuButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.6, text=LABEL_MAIN_MENU, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
+		self.quitButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
 		
 		# Bind buttons
 		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.goto_PlayGame)
@@ -270,8 +268,8 @@ class Application(tk.Frame):
 		root.config(cursor="none")
 		
 		# Calculate game grid
-		gameGridWidth = round((WINDOW_W - 142)/40)
-		gameGridHeight = round((WINDOW_H - 142)/40)
+		gameGridWidth = round((WINDOW_W - 145)/40)
+		gameGridHeight = round((WINDOW_H - 145)/40)
 		
 		# Set grid origins
 		gridOriginX = WINDOW_W / 2 - (gameGridWidth * 20)
@@ -286,6 +284,7 @@ class Application(tk.Frame):
 		# Some vars for game
 		self.snake_tail = 5
 		self.foodEaten = False
+		self.snakePoints = 0
 		snake_level = 1
 		
 		# Movement vars for the snake
@@ -327,11 +326,19 @@ class Application(tk.Frame):
 																	 tags=("foodItem", "gameItems"))
 				
 
-		def food_energy(snake_points):
-			snake_points += randint(1, 15)
-			snake_points += randint(0, 22)
-			return snake_points
-		
+		def getCalories():
+			
+			# 10 points for food
+			self.snakePoints += 10
+			self.snakePoints += round(self.snake_tail/3)
+			
+			# Bonus for edge objects
+			if food_index[0] == 1 or food_index[0] == gameGridWidth:
+				self.snakePoints += 4
+			if food_index[1] == 1 or food_index[1] == gameGridHeight:
+				self.snakePoints += 4
+
+					
 		def define_level(x):
 			
 			# Bumb level up for 5 eaten food
@@ -405,7 +412,7 @@ class Application(tk.Frame):
 			self.GameFrame.unbind(KEY_RIGHT)
 		
 		# Create text for score and level
-		self.score_text = self.GameFrame.create_text(50, 25, anchor=tk.W, justify=tk.CENTER, text=LABEL_SCORE + "0", font=('Calibri', '15', 'bold'), fill=TEXT_COLOR, tags="gameItems")
+		self.score_text = self.GameFrame.create_text(50, 25, anchor=tk.W, justify=tk.CENTER, text=LABEL_SCORE + str(self.snakePoints), font=('Calibri', '15', 'bold'), fill=TEXT_COLOR, tags="gameItems")
 		self.level_text = self.GameFrame.create_text(WINDOW_W - 50, 25, anchor=tk.E, justify=tk.CENTER, text=LABEL_LEVEL + str(define_level(self.snake_tail)), font=('Calibri', '15', "bold"), fill=TEXT_COLOR, tags="gameItems")
 		
 		# Create a food item and snake head
@@ -427,11 +434,12 @@ class Application(tk.Frame):
 			# If food is eaten
 			if snake_index[0] == food_index[0] and snake_index[1] == food_index[1]:
 				self.foodEaten = True
+				getCalories()
 				self.GameFrame.delete("foodItem")
 				self.snake_tail += 1
 				
 				# Update score and points
-				self.GameFrame.itemconfigure(self.score_text, text=LABEL_SCORE + str(food_energy(self.snake_tail)))
+				self.GameFrame.itemconfigure(self.score_text, text=LABEL_SCORE + str(self.snakePoints))
 				self.GameFrame.itemconfigure(self.level_text, text=LABEL_LEVEL + str(define_level(self.snake_tail)))
 				
 				# Create new food
@@ -442,7 +450,7 @@ class Application(tk.Frame):
 				if checkGameOver() == True:
 					snakeMoves = False
 				else:
-					self.GameFrame.after(120, moveSnake)
+					self.GameFrame.after(120 - round(self.snake_tail/3), moveSnake)
 			
 		moveSnake()
 	
