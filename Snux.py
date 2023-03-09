@@ -64,17 +64,19 @@ GAME_OVER_LABEL_COLOR = "yellow"
 GAME_WIN_LABEL_COLOR = "yellow"
 
 ### Translation ###
-LABEL_NEW_GAME = "Neues Spiel"
-LABEL_ABOUT = "Über"
-LABEL_TUTORIAL = "Tutorial"
-LABEL_QUIT = "Beenden"
-LABEL_MAIN_MENU = "Hauptmenü"
+LABEL_NEW_GAME = "New Game"
+LABEL_ABOUT = "About"
+LABEL_TUTORIAL = "How to play?"
+LABEL_QUIT = "Quit Game"
+LABEL_MAIN_MENU = "Main Menu"
 LABEL_GAME_OVER = "GAME OVER"
-LABEL_GAME_WIN = "GEWONNEN"
-LABEL_BACK = "Zurück"
-LABEL_SCORE = "Punkte: "
+LABEL_GAME_WIN = "YOU WON"
+LABEL_BACK = "Back"
+LABEL_SCORE = "Points: "
 LABEL_LEVEL = "Level: "
 LABEL_VERSION = "Version: "
+
+## Need translation
 TEXT_1_TUTORIAL = "Bei diesem Spiel müsst ihr schnell sein. Ihr seid die Schlange im Spielfeld. Diese Schlange könnt ihr mit den Pfeiltasten steuern: rechts, links, oben und unten. Ihr dürft nie den Rand des Spielfeldes berühren. Kommt ihr an den Rand, ist das Spiel sofort vorbei. Ziel ist es die Punkte im Spielfeld aufzusammeln. Durch die Punkte wird die Schlange nach und nach länger und schneller.\n\n\nViel Spaß"
 
 class Application(tk.Frame):
@@ -282,12 +284,16 @@ class Application(tk.Frame):
 		food_index = [17, 12]
 		
 		# Some vars for game
-		snake_tail = 5
+		self.snake_tail = 5
+		self.foodEaten = False
 		snake_level = 1
 		
 		# Movement vars for the snake
 		self.dir_x = 40
 		self.dir_y = 0
+		
+		# Snake moves
+		self.snakeMoves = True
 		
 		def create_head():
 			
@@ -300,31 +306,19 @@ class Application(tk.Frame):
 																	 
 		def create_tail():
 			self.GameFrame.delete("tailItems")
-			t = 1
-			for i in range(snake_tail):
-				self.snake_tail_object = self.GameFrame.create_oval(gridOriginX + (snake_index[t+1]*40) - 32, 
-																	gridOriginY + (snake_index[t+2]*40) - 32, 
-																	gridOriginX + (snake_index[t+1]*40) - 8, 
-																	gridOriginY + (snake_index[t+2]*40) - 8, 
+			for i in range(1, self.snake_tail+1):
+				self.snake_tail_object = self.GameFrame.create_oval(gridOriginX + (snake_index[(i*2)]*40) - 32, 
+																	gridOriginY + (snake_index[(i*2)+1]*40) - 32, 
+																	gridOriginX + (snake_index[(i*2)]*40) - 8, 
+																	gridOriginY + (snake_index[(i*2)+1]*40) - 8, 
 																	fill="yellow", tags=("tailItems", "gameItems"))
 																	 
-				t += 2
 				
 		def create_food():
 			
 			# Put some random number in food index, need work
 			food_index.insert(0, randint(1, gameGridHeight))
 			food_index.insert(0, randint(1, gameGridWidth))
-			
-			"""
-			# Draw food
-			self.food_object = self.GameFrame.create_oval(gridOriginX + (food_index[0]*40) - 32, 
-																	 gridOriginY + (food_index[1]*40) - 32, 
-																	 gridOriginX + (food_index[0]*40) - 8, 
-																	 gridOriginY + (food_index[1]*40) - 8,
-																		fill="blue", tags=("foodItem", "gameItems"))
-																	
-			"""
 			
 			# Testing image as food
 			self.foodImage = tk.PhotoImage(file = "./data/food.png")
@@ -354,6 +348,13 @@ class Application(tk.Frame):
 			snake_index.insert(0, round(yField))
 			snake_index.insert(0, round(xField))
 			
+			# Remove last 2 items in snake_index
+			if self.foodEaten == False:
+				snake_index.pop()
+				snake_index.pop()
+			else:
+				self.foodEaten = False
+			
 		def checkGameOver():
 			
 			# If snake touches the edge
@@ -362,7 +363,7 @@ class Application(tk.Frame):
 				return True
 			
 			# If snake head touches snake tail
-			for x in range(1, snake_tail + 1):
+			for x in range(1, self.snake_tail):
 				if snake_index[0] == snake_index[x*2] and snake_index[1] == snake_index[(x*2)+1]:
 					self.game_over()
 					return True
@@ -391,54 +392,59 @@ class Application(tk.Frame):
 				self.dir_x = 40
 				self.dir_y = 0
 		
+		def bind_keys():
+			self.GameFrame.bind(KEY_UP, arrow_key_up)
+			self.GameFrame.bind(KEY_DOWN, arrow_key_down)
+			self.GameFrame.bind(KEY_LEFT, arrow_key_left)
+			self.GameFrame.bind(KEY_RIGHT, arrow_key_right)	
+		
 		def unbind_keys():
 			self.GameFrame.unbind(KEY_UP)
 			self.GameFrame.unbind(KEY_DOWN)
 			self.GameFrame.unbind(KEY_LEFT)
 			self.GameFrame.unbind(KEY_RIGHT)
-
+		
+		# Create text for score and level
 		self.score_text = self.GameFrame.create_text(50, 25, anchor=tk.W, justify=tk.CENTER, text=LABEL_SCORE + "0", font=('Calibri', '15', 'bold'), fill=TEXT_COLOR, tags="gameItems")
-		self.level_text = self.GameFrame.create_text(WINDOW_W - 50, 25, anchor=tk.E, justify=tk.CENTER, text=LABEL_LEVEL + str(define_level(snake_tail)), font=('Calibri', '15', "bold"), fill=TEXT_COLOR, tags="gameItems")
+		self.level_text = self.GameFrame.create_text(WINDOW_W - 50, 25, anchor=tk.E, justify=tk.CENTER, text=LABEL_LEVEL + str(define_level(self.snake_tail)), font=('Calibri', '15', "bold"), fill=TEXT_COLOR, tags="gameItems")
+		
+		# Create a food item and snake head
 		create_food()
 		create_head()
 		
-		while True:
+		# Hier is function for moving the snake
+		def moveSnake():
 			
+			# Set focus and bind keys
 			self.GameFrame.focus_set()
+			bind_keys()
 			
-			# Check for game over
-			if checkGameOver() == True:
-				break	
-			
-			# Bind keys
-			self.GameFrame.bind(KEY_UP, arrow_key_up)
-			self.GameFrame.bind(KEY_DOWN, arrow_key_down)
-			self.GameFrame.bind(KEY_LEFT, arrow_key_left)
-			self.GameFrame.bind(KEY_RIGHT, arrow_key_right)		
-			
-			# Show tail and move head
+			# Move head, update index acording to new head position and then create tail
+			self.GameFrame.move(self.snake_head_object, self.dir_x, self.dir_y)
+			update_index()
 			create_tail()
-			root.update()
-			self.GameFrame.move(self.snake_head_object, self.dir_x, self.dir_y)		
 			
-			# Wait for next move
-			# Snake speed is derived from lenght of snake tail
-			self.GameFrame.after(100 - round(snake_tail/3))
-
-			# If the food is eaten
+			# If food is eaten
 			if snake_index[0] == food_index[0] and snake_index[1] == food_index[1]:
+				self.foodEaten = True
 				self.GameFrame.delete("foodItem")
-				
-				snake_tail += 1
+				self.snake_tail += 1
 				
 				# Update score and points
-				self.GameFrame.itemconfigure(self.score_text, text=LABEL_SCORE + str(food_energy(snake_tail)))
-				self.GameFrame.itemconfigure(self.level_text, text=LABEL_LEVEL + str(define_level(snake_tail)))
+				self.GameFrame.itemconfigure(self.score_text, text=LABEL_SCORE + str(food_energy(self.snake_tail)))
+				self.GameFrame.itemconfigure(self.level_text, text=LABEL_LEVEL + str(define_level(self.snake_tail)))
 				
 				# Create new food
 				create_food()
-				
-			update_index()
+			
+			# Look for gameover
+			if self.snakeMoves:
+				if checkGameOver() == True:
+					snakeMoves = False
+				else:
+					self.GameFrame.after(120, moveSnake)
+			
+		moveSnake()
 	
 	def quit_game(self, root):
 		self.quit()	
