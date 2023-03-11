@@ -36,8 +36,8 @@ from PIL import ImageTk
 GAME_NAME = "Snux"
 GAME_VERSION = "2.0"
 GAME_LICENCE = "GPLv3"
-AUTHOR = "Ilija Culap"
-AUTHOR_EMAIL = "ilija.culap14@gmail.com"
+AUTHOR = "Ilija Culap <ilija.culap14@gmail.com>"
+AUTHOR_EMAIL = ""
 WINDOW_H = 900
 WINDOW_W = 1200
 FRAME_OFFSET = 50
@@ -47,6 +47,8 @@ FONTFILE_GAMEOVER = ("./data/fonts/gameover.ttf")
 FONTFILE_TUTORIAL = ("./data/fonts/tutorial.ttf")
 FONTFILE_BACK = ("./data/fonts/back.ttf")
 FONTFILE_GAMESELECTOR_HEADING = ("./data/fonts/gameselector_heading.otf")
+FONTFILE_MENUITEM = ("./data/fonts/menuitem.otf")
+FONTFILE_VERSION = ("./data/fonts/version.otf")
 
 ### Keys ###
 KEY_UP = "<Up>"
@@ -88,7 +90,8 @@ LABEL_GAMESELECTOR_LEVEL = "Choose level"
 LABEL_LEVELSELECTOR_HEADING = "Select the level!"
 
 ## Need translation
-TEXT_1_TUTORIAL = "Bei diesem Spiel müsst ihr schnell sein. Ihr seid die Schlange im Spielfeld. Diese Schlange könnt ihr mit den Pfeiltasten steuern: rechts, links, oben und unten. Ihr dürft nie den Rand des Spielfeldes berühren. Kommt ihr an den Rand, ist das Spiel sofort vorbei. Ziel ist es die Punkte im Spielfeld aufzusammeln. Durch die Punkte wird die Schlange nach und nach länger und schneller.\n\n\nViel Spaß"
+TEXT_1_TUTORIAL = "In this game you have to be fast. You are snake that moves in game field. You can control the snake with arrow keys, Up, Down, Left and Right. You have to avoid touching obstacles and snake itself. Goal is to eat as much as possible food elements. With every food item taken, snake is going to be longer and faster. Good Luck!!"
+
 
 class Application(tk.Frame):	
 	def __init__(self, master=None):
@@ -96,29 +99,8 @@ class Application(tk.Frame):
 		self.imgObjects = []
 		self.pack()
 		self.create_GameFrame()
-		
-		# Disable greeting and mainmenu for testing
 		self.show_Greeting()
 		self.goto_MainMenu(self)
-		
-		
-	def createMainMenuItem(self, canvas, x, y, anchor="center", tags=(), img_leave="", img_enter="", gotoFunc=0):
-		
-		# Load images
-		self.imageP = tk.PhotoImage(file = img_enter)
-		self.imageA = tk.PhotoImage(file = img_leave)	
-		self.imgObjects.append(self.imageP)
-		self.imgObjects.append(self.imageA)
-		
-		# Create a object id
-		objectID = "OID-" + str(randint(1, 5000))
-		tags_out = (tags, objectID)
-		
-		# Show image
-		self.image = self.GameFrame.create_image(x, y, image=self.imageP, tags=tags_out)
-		
-		# Bind button to function
-		self.GameFrame.tag_bind(objectID, "<Button-1>", gotoFunc)
 			
 	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
 		
@@ -200,10 +182,12 @@ class Application(tk.Frame):
 		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
 
 		# Version in bottom right corner
-		self.v_text = self.GameFrame.create_text(WINDOW_W - FRAME_OFFSET, WINDOW_H - (FRAME_OFFSET/2), anchor=tk.E, justify=tk.RIGHT, text=LABEL_VERSION + GAME_VERSION , font=('Calibri', '11'), fill=TEXT_COLOR)
+		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - FRAME_OFFSET, WINDOW_H - (FRAME_OFFSET/2), text=LABEL_VERSION + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=20, anchor="e")
 		self.GameFrame.pack()
 
 	def create_BackButton(self, where):
+		
+		# Create back button
 		self.back_Button = self.createTextExt(self.GameFrame, x=50, y=25, text=LABEL_BACK, fill=TEXT_COLOR, fontfile=FONTFILE_BACK, size=20, anchor="w", tags="tutorialItems", bind=True, bindfunc=where)
 
 	def show_Greeting(self):
@@ -291,33 +275,28 @@ class Application(tk.Frame):
 		# Remove everything from the screen
 		self.remove_Everything()
 		
+		# Game over text
+		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.25, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
+		
 		# Score
 		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.4, text=LABEL_SCORE + str(self.snakePoints), fill="grey", fontfile=FONTFILE_BACK, size=50, anchor=tk.CENTER, tags="goScreenItem")
 
-		# Game over text
-		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.2, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
-		
 		# Menu
-		self.newGameButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.welcomeMenuButton = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.6, text=LABEL_MAIN_MENU, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		self.quitButton_1 = self.GameFrame.create_text(WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, font=('Calibri', '18', "bold"), fill=MENU_TEXT_COLOR, activefill=MENU_TEXT_COLOR_OVER, tags="goScreenItem")
-		
-		# Bind buttons
-		self.GameFrame.tag_bind(self.newGameButton_1, "<Button-1>", self.goto_PlayGame)
-		self.GameFrame.tag_bind(self.welcomeMenuButton, "<Button-1>", self.goto_MainMenu)
-		self.GameFrame.tag_bind(self.quitButton_1, "<Button-1>", self.quit_game)
-		
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, fill=MENU_TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_PlayGame)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.6, text=LABEL_MAIN_MENU, fill=MENU_TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_MainMenu)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, fill=MENU_TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.quit_game)
+
 	def goto_MainMenu(self, GameFrame):
 		
 		# Remove everything from screen
 		self.remove_Everything()
 		
-		# Main menu buttons with pics
-		self.createMainMenuItem(self.GameFrame, WINDOW_W/2, WINDOW_H*0.3, img_enter="data/mainmenu/newgame_p.png", gotoFunc=self.goto_GameSelector, tags="wmitemTag")
-		self.createMainMenuItem(self.GameFrame, WINDOW_W/2, WINDOW_H*0.45, img_enter="data/mainmenu/howtoplay_p.png", gotoFunc=self.goto_Tutorial, tags="wmitemTag")
-		self.createMainMenuItem(self.GameFrame, WINDOW_W/2, WINDOW_H*0.6, img_enter="data/mainmenu/about_p.png", img_leave="data/mainmenu/about_a.png", gotoFunc=self.goto_About, tags="wmitemTag")
-		self.createMainMenuItem(self.GameFrame, WINDOW_W/2, WINDOW_H*0.75, img_enter="data/mainmenu/quit_p.png", gotoFunc=self.quit_game, tags="wmitemTag")
-	
+		# Main menu buttons
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.35, text=LABEL_NEW_GAME, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.goto_GameSelector)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.45, text=LABEL_TUTORIAL, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.goto_Tutorial)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_ABOUT, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.goto_About)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.quit_game)
+
 	def goto_PlayGame(self, GameFrame):
 		
 		self.remove_Everything()
