@@ -32,12 +32,13 @@ from PIL import ImageDraw as pildraw
 from PIL import ImageFont as pilfont
 from PIL import ImageTk
 
-### Game relevant ###
+# Game vars, name, version etc
 GAME_NAME = "Snux"
 GAME_VERSION = "2.0"
 GAME_LICENCE = "GPLv3"
-AUTHOR = "Ilija Culap <ilija.culap14@gmail.com>"
-AUTHOR_EMAIL = ""
+GAME_AUTHOR = "Ilija Culap <ilija.culap14@gmail.com>"
+
+# Window vars
 WINDOW_H = 900
 WINDOW_W = 1200
 FRAME_OFFSET = 50
@@ -50,33 +51,34 @@ FONTFILE_GAMESELECTOR_HEADING = ("./data/fonts/gameselector_heading.otf")
 FONTFILE_MENUITEM = ("./data/fonts/menuitem.otf")
 FONTFILE_VERSION = ("./data/fonts/version.otf")
 
-# Image files, it defaults to survival mode
-FILE_BG = "./data/levels/level-0/bg.png"
-FILE_FOOD_1 = "./data/levels/level-0/food_1.png"
-FILE_FOOD_2 = "./data/levels/level-0/food_2.png"
-FILE_FOOD_3 = "./data/levels/level-0/food_3.png"
-FILE_FOOD_BONUS = "./data/levels/level-0/food_bonus.png"
+# Folders for levels, default is survival mode
+FOLDER_LEVEL = "./data/levels/survival/"
+FOLDER_LEVELS = "./data/levels/"
 
-### Keys ###
+# Keys
 KEY_UP = "<Up>"
 KEY_DOWN = "<Down>"
 KEY_RIGHT = "<Right>"
 KEY_LEFT = "<Left>"
 
-### Colors ###
+# Window colors
 BG_COLOR = "black"
 TEXT_COLOR = "white"
+FRAME_COLOR = "white"
+
+# Snake colors
 HEAD_COLOR = "white"
 TAIL_COLOR = "yellow"
-FOOD_COLOR = "green"
-FRAME_COLOR = "white"
-MENU_TEXT_COLOR = "white"
-MENU_TEXT_COLOR_OVER = "#1B94C6"
+
+# Menus and buttons
+COLOR_MENU = "white"
+COLOR_MENU_OVER = "#1B94C6"
 GAME_OVER_LABEL_COLOR = "yellow"
 GAME_WIN_LABEL_COLOR = "yellow"
 
-### Translation ###
+# Translation
 LABEL_NEW_GAME = "New Game"
+LABEL_CHOOSE_GAME = "Choose another game"
 LABEL_ABOUT = "About this game"
 LABEL_TUTORIAL = "How to play?"
 LABEL_QUIT = "Quit Game"
@@ -98,8 +100,10 @@ LABEL_GAMESELECTOR_LEVEL = "Choose level"
 # Level selector
 LABEL_LEVELSELECTOR_HEADING = "Select the level!"
 
-TEXT_1_TUTORIAL = "In this game you have to be fast. You are snake that moves in game field. You can control the snake with arrow keys, Up, Down, Left and Right. You have to avoid touching obstacles and snake itself. Goal is to eat as much as possible food elements. With every food item taken, snake is going to be longer and faster. Good Luck!!"
-
+HOWTOPLAY = "In this game you have to be fast. You are snake that moves in game field. You can control the snake with arrow keys, Up, Down, Left and Right. You have to avoid touching obstacles and snake itself. Goal is to eat as much as possible food elements. With every food item taken, snake is going to be longer and faster. Good Luck!!"
+TEXT_ABOUT_1 = "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; version 3"
+TEXT_ABOUT_2 = "Author:"
+TEXT_ABOUT_3 = "Licence: "
 
 class Application(tk.Frame):	
 	def __init__(self, master=None):
@@ -107,7 +111,7 @@ class Application(tk.Frame):
 		self.imgObjects = []
 		self.pack()
 		self.create_GameFrame()
-		self.show_Greeting()
+		#self.show_Greeting()
 		self.goto_MainMenu(self)
 			
 	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
@@ -117,10 +121,10 @@ class Application(tk.Frame):
 
 		# Check if the text is multilined
 		# get line lenght in char for given width
-		if ml == True:
-			oneCharWidth = font.getlength("O")
+		if ml == True:			
+			oneCharWidth = font.getbbox("O", anchor='lt')[2]
 			numberOfChar = round(width/oneCharWidth)			
-			
+
 			words = text.split()
 			lineOfText = ""
 			text_new = ""		
@@ -132,7 +136,7 @@ class Application(tk.Frame):
 				lineOfText += word + " "
 			text_new += lineOfText
 			
-			numberOfLines = text_new.count("\n")
+			numberOfLines = text_new.count("\n") + 1
 			text = text_new
 			
 			# Find longest line and adjust the width of the widget
@@ -157,7 +161,7 @@ class Application(tk.Frame):
 	
 		# Create image
 		img1 = pilimage.new("RGBA", (imageWidth, imageHeight), "#00000000")
-			
+				
 		# Add Text to image
 		pildraw.Draw(img1).multiline_text((0, 0), text, fill, font=font, spacing=spacing, align="center")
 		
@@ -167,9 +171,9 @@ class Application(tk.Frame):
 		
 		objectID = "OID-" + str(randint(1, 5000))
 		tags_out = (tags, objectID)
-				
+
 		# Show image
-		self.imgdraw = canvas.create_image(x, y - round(img1.size[1]/size), image=imgext, anchor=anchor, tags=tags_out)
+		self.imgdraw = canvas.create_image(x, y, image=imgext, anchor=anchor, tags=tags_out)
 		
 		if bind == True:
 			self.GameFrame.tag_bind(objectID, "<Button-1>", bindfunc)
@@ -180,14 +184,14 @@ class Application(tk.Frame):
 		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
 		
 		# Background image
-		self.backgroundImage = tk.PhotoImage(file = "./data/bg.png")
+		self.backgroundImage = tk.PhotoImage(file = FOLDER_LEVEL + "bg.png")
 		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW)
 
 		# Draw 4 lines
-		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, width=1, fill=FRAME_COLOR)
-		self.frame_line = self.GameFrame.create_line(WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 2, width=1, fill=FRAME_COLOR)
-		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
-		self.frame_line = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
+		self.frameLine1 = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, width=1, fill=FRAME_COLOR)
+		self.frameLine2 = self.GameFrame.create_line(WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 2, width=1, fill=FRAME_COLOR)
+		self.frameLine3 = self.GameFrame.create_line(FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
+		self.frameLine4 = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
 
 		# Version in bottom right corner
 		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - FRAME_OFFSET, WINDOW_H - (FRAME_OFFSET/2), text=LABEL_VERSION + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=20, anchor="e")
@@ -224,6 +228,16 @@ class Application(tk.Frame):
 		# Remove everything from screen
 		self.remove_Everything()
 		
+		# Survival mode
+		def onSurvivalMode(event):
+			self.gameMode = "survival"
+			self.goto_PlayGame(self)
+			
+		# Level mode
+		def onLevelMode(event):
+			self.gameMode = "level"
+			self.goto_LevelSelector(self)
+		
 		# Heading
 		self.gameSelectorHeading = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.18, text=LABEL_GAMESELECTOR_HEADING, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="wmitemTag")
 
@@ -236,8 +250,8 @@ class Application(tk.Frame):
 		self.gs_Level = self.GameFrame.create_image(WINDOW_W * 0.7, WINDOW_H * 0.4, image=self.imgLevel, tags="gsItems")
 		
 		# Show labels
-		self.gs_SurviveLabel = self.createTextExt(self.GameFrame, WINDOW_W * 0.3, WINDOW_H * 0.55, text=LABEL_GAMESELECTOR_SURVIVAL, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="gsItems", bind=True, bindfunc=self.goto_PlayGame)
-		self.gs_LevelLabel = self.createTextExt(self.GameFrame, WINDOW_W * 0.7, WINDOW_H * 0.55, text=LABEL_GAMESELECTOR_LEVEL, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="gsItems", bind=True, bindfunc=self.goto_LevelSelector)
+		self.gs_SurviveLabel = self.createTextExt(self.GameFrame, WINDOW_W * 0.3, WINDOW_H * 0.55, text=LABEL_GAMESELECTOR_SURVIVAL, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="gsItems", bind=True, bindfunc=onSurvivalMode)
+		self.gs_LevelLabel = self.createTextExt(self.GameFrame, WINDOW_W * 0.7, WINDOW_H * 0.55, text=LABEL_GAMESELECTOR_LEVEL, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="gsItems", bind=True, bindfunc=onLevelMode)
 		
 		# Back button
 		self.create_BackButton(self.goto_MainMenu)
@@ -250,6 +264,11 @@ class Application(tk.Frame):
 		# Heading
 		self.levelSelectorHeading = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.18, text=LABEL_LEVELSELECTOR_HEADING, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="wmitemTag")
 		
+		# Read manifest file to determine what levels are installed
+		
+		# Debug
+		self.levelFolder = "level-1"
+		
 		# Back button
 		self.create_BackButton(self.goto_GameSelector)
 				
@@ -259,22 +278,25 @@ class Application(tk.Frame):
 		self.remove_Everything()
 		
 		# Tutorial Text through new font system
-		self.tutorial_text = self.createTextExt(self.GameFrame, x=WINDOW_W/2, y=WINDOW_H/2, text=TEXT_1_TUTORIAL, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=40, anchor="center", tags="tutorialItems", ml=True, width=WINDOW_W-110, spacing=25)
+		self.tutorial_text = self.createTextExt(self.GameFrame, x=WINDOW_W/2, y=WINDOW_H/2, text=HOWTOPLAY, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=40, anchor="center", tags="tutorialItems", ml=True, width=WINDOW_W-80, spacing=25)
 		
 		# Back button
 		self.create_BackButton(self.goto_MainMenu)
 		
 	def goto_About(self, GameFrame):
-		self.GameFrame.delete("wmitemTag")
-			
-		self.t1 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.40, text="Name des Spiels: " + GAME_NAME, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t2 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.45, text="Spiel Version: " + GAME_VERSION, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t3 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.50, text="Lizenz: " + GAME_LICENCE, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t4 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.55, text="Author: " + AUTHOR, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
-		self.t5 = self.GameFrame.create_text(WINDOW_W*0.15, WINDOW_H*0.60, text="Email: " + AUTHOR_EMAIL, font=('Calibri', '18'), fill=TEXT_COLOR, anchor=tk.W, justify=tk.LEFT, tags="aboutItems")
+		
+		# Remove everything from screen
+		self.remove_Everything()
 		
 		# Back button
 		self.create_BackButton(self.goto_MainMenu)
+		
+		# Create text
+		self.aboutText1 = self.createTextExt(self.GameFrame, x=WINDOW_W/2, y=200, text=TEXT_ABOUT_1, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="center", tags="aboutItems", ml=True, width=WINDOW_W - 100, spacing=10)
+		self.author1 = self.createTextExt(self.GameFrame, x=WINDOW_W*0.60, y=400, text=TEXT_ABOUT_2, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="w", tags="aboutItems")
+		self.author2 = self.createTextExt(self.GameFrame, x=WINDOW_W*0.60, y=430, text=GAME_AUTHOR, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="w", tags="aboutItems")
+		self.licence1 = self.createTextExt(self.GameFrame, x=WINDOW_W*0.60, y=500, text=TEXT_ABOUT_3, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="w", tags="aboutItems")
+		self.licence2 = self.createTextExt(self.GameFrame, x=WINDOW_W*0.60, y=530, text=GAME_LICENCE, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="w", tags="aboutItems")
 		
 	def goto_GameOver(self): #### Need work
 		
@@ -291,9 +313,10 @@ class Application(tk.Frame):
 		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.4, text=LABEL_SCORE + str(self.snakePoints), fill="grey", fontfile=FONTFILE_BACK, size=50, anchor=tk.CENTER, tags="goScreenItem")
 
 		# Menu
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, fill=MENU_TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_PlayGame)
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.6, text=LABEL_MAIN_MENU, fill=MENU_TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_MainMenu)
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, fill=MENU_TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.quit_game)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_PlayGame)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.6, text=LABEL_CHOOSE_GAME, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_GameSelector)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_MAIN_MENU, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_MainMenu)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.7, text=LABEL_QUIT, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.quit_game)
 
 	def goto_MainMenu(self, GameFrame):
 		
@@ -308,13 +331,17 @@ class Application(tk.Frame):
 
 	def goto_PlayGame(self, GameFrame):
 		
+		# Remove everything from the screen
 		self.remove_Everything()
 		
 		# Determine in what mode we are
-		self.gameMode = "survival"
+		if self.gameMode == "survival":
+			FOLDER_LEVEL = "./data/levels/survival/"
+			self.start_Game()
+		elif self.gameMode == "level":
+			FOLDER_LEVEL = "./data/" + self.levelFolder
+			self.start_Game()
 		
-		self.start_Game()
-	
 	def start_Game(self):
 		
 		# Disable cursor
@@ -353,10 +380,10 @@ class Application(tk.Frame):
 		def create_head():
 			
 			# Snake width is 24px
-			self.snake_head_object = self.GameFrame.create_oval(gridOriginX + (snake_index[0]*40) - 35, 
-																	 gridOriginY + (snake_index[1]*40) - 35, 
-																	 gridOriginX + (snake_index[0]*40) - 5, 
-																	 gridOriginY + (snake_index[1]*40) - 5, 
+			self.snake_head_object = self.GameFrame.create_oval(gridOriginX + (snake_index[0]*40) - 32, 
+																	 gridOriginY + (snake_index[1]*40) - 32, 
+																	 gridOriginX + (snake_index[0]*40) - 8, 
+																	 gridOriginY + (snake_index[1]*40) - 8, 
 																	 fill=HEAD_COLOR, tags=("gameItems"))
 																	 
 		def create_tail():
@@ -376,7 +403,7 @@ class Application(tk.Frame):
 			food_index_1.insert(0, randint(1, gameGridWidth))
 			
 			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FILE_FOOD_1)
+			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_1.png")
 			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_1[0]*40), 
 																	 gridOriginY + (food_index_1[1]*40), anchor=tk.SE,image=self.foodImage, 
 																	 tags=("foodItem", "gameItems"))
@@ -388,7 +415,7 @@ class Application(tk.Frame):
 			food_index.insert(0, randint(1, gameGridWidth))
 			
 			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FILE_FOOD_2)
+			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_2.png")
 			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_2[0]*40), 
 																	 gridOriginY + (food_index_2[1]*40), anchor=tk.SE,image=self.foodImage, 
 																	 tags=("foodItem", "gameItems"))
@@ -400,7 +427,7 @@ class Application(tk.Frame):
 			food_index.insert(0, randint(1, gameGridWidth))
 			
 			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FILE_FOOD_3)
+			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_3.png")
 			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_3[0]*40), 
 																	 gridOriginY + (food_index_3[1]*40), anchor=tk.SE,image=self.foodImage, 
 																	 tags=("foodItem", "gameItems"))
@@ -414,7 +441,7 @@ class Application(tk.Frame):
 			food_index.insert(0, randint(1, gameGridWidth))
 			
 			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FILE_FOOD_BONUS)
+			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_bonus.png")
 			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_bonus[0]*40), 
 																	 gridOriginY + (food_index_bonus[1]*40), anchor=tk.SE,image=self.foodImage, 
 																	 tags=("foodItem", "gameItems"))
@@ -436,6 +463,10 @@ class Application(tk.Frame):
 			# Bumb level up for 5 eaten food
 			level = round((x/5) - 0.49)
 			return level
+			
+		def defineGameMode():
+			# This function need to define mode and set all vars
+			pass
 
 		def update_index():
 			
