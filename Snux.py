@@ -111,7 +111,7 @@ class Application(tk.Frame):
 		self.imgObjects = []
 		self.pack()
 		self.create_GameFrame()
-		#self.show_Greeting()
+		self.show_Greeting()
 		self.goto_MainMenu(self)
 			
 	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
