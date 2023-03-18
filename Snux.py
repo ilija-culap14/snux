@@ -187,12 +187,6 @@ class Application(tk.Frame):
 		self.backgroundImage = tk.PhotoImage(file = FOLDER_LEVEL + "bg.png")
 		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW)
 
-		# Draw 4 lines
-		self.frameLine1 = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, width=1, fill=FRAME_COLOR)
-		self.frameLine2 = self.GameFrame.create_line(WINDOW_W - FRAME_OFFSET - 1, FRAME_OFFSET, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 2, width=1, fill=FRAME_COLOR)
-		self.frameLine3 = self.GameFrame.create_line(FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, WINDOW_W - FRAME_OFFSET - 1, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
-		self.frameLine4 = self.GameFrame.create_line(FRAME_OFFSET, FRAME_OFFSET, FRAME_OFFSET, WINDOW_H - FRAME_OFFSET - 1, width=1, fill=FRAME_COLOR)
-
 		# Version in bottom right corner
 		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - FRAME_OFFSET, WINDOW_H - (FRAME_OFFSET/2), text=LABEL_VERSION + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=20, anchor="e")
 		self.GameFrame.pack()
