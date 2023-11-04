@@ -52,8 +52,12 @@ FONTFILE_MENUITEM = ("./data/fonts/menuitem.otf")
 FONTFILE_VERSION = ("./data/fonts/version.otf")
 
 # Folders for levels, default is survival mode
-FOLDER_LEVEL = "./data/levels/survival/"
+FOLDER_LEVEL = ""
 FOLDER_LEVELS = "./data/levels/"
+FOLDER_DEFAULT = "./data/default/"
+
+# Levels system
+LEVELS_INFO = []
 
 # Keys
 KEY_UP = "<Up>"
@@ -110,8 +114,15 @@ class Application(tk.Frame):
 		tk.Frame.__init__(self, master)
 		self.imgObjects = []
 		self.pack()
-		self.create_GameFrame()
-		self.show_Greeting()
+		
+		# Create Canvas
+		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
+		
+		# Set initial background image and version number
+		self.set_Background(FOLDER_DEFAULT)
+		
+		# Show greeting and go to MainMenu
+		#self.show_Greeting()
 		self.goto_MainMenu(self)
 			
 	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
@@ -177,20 +188,20 @@ class Application(tk.Frame):
 		
 		if bind == True:
 			self.GameFrame.tag_bind(objectID, "<Button-1>", bindfunc)
+	
+	def set_Background(self, folder):
 		
-	def create_GameFrame(self):
-		
-		# Create a new canvas for the game
-		self.GameFrame = tk.Canvas(self, height=WINDOW_H, width=WINDOW_W, bg=BG_COLOR)
-		
-		# Background image
-		self.backgroundImage = tk.PhotoImage(file = FOLDER_LEVEL + "bg.png")
-		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW)
+		# Remove old bg
+		self.GameFrame.delete("initialItem")
+				
+		# Set initil background image
+		self.backgroundImage = tk.PhotoImage(file = folder + "bg.png")
+		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW, tags="initialItem")
 
 		# Version in bottom right corner
-		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - FRAME_OFFSET, WINDOW_H - (FRAME_OFFSET/2), text=LABEL_VERSION + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=20, anchor="e")
+		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - 20, WINDOW_H - 20, text=LABEL_VERSION + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=17, anchor="se", tags="initialItem")
 		self.GameFrame.pack()
-
+		
 	def create_BackButton(self, where):
 		
 		# Create back button
@@ -221,7 +232,7 @@ class Application(tk.Frame):
 		
 		# Remove everything from screen
 		self.remove_Everything()
-		
+
 		# Survival mode
 		def onSurvivalMode(event):
 			self.gameMode = "survival"
@@ -254,11 +265,38 @@ class Application(tk.Frame):
 		
 		# Remove everything from screen
 		self.remove_Everything()
-		
+
 		# Heading
 		self.levelSelectorHeading = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.18, text=LABEL_LEVELSELECTOR_HEADING, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="wmitemTag")
 		
+		# Grid is 3x3 for levels
+		# Every element has picture (thumb.png) and name from LEVELS_INFO
+		
 		# Read manifest file to determine what levels are installed
+		global LEVELS_INFO
+		with open(FOLDER_LEVELS + "manifest", "r") as f:
+			for line in f.readlines():
+				if line == "\n":
+					pass
+				else:
+					LEVELS_INFO.append(line.replace("\n", "").split("@@@@@"))
+			
+		
+		#################################
+		# 
+		# INFO
+		#
+		# Level folder containt: 
+		#      - bg.png
+		#      - food-1.png
+		#      - food-2.png
+		#      - food-3.png
+		#      - food-bonus.png
+		#      - thumb.png
+		#      - snake.cfg
+		#      - const.png
+		# 
+		#################################
 		
 		# Debug
 		self.levelFolder = "level-1"
@@ -270,9 +308,9 @@ class Application(tk.Frame):
 		
 		# Remove everything from screen
 		self.remove_Everything()
-		
+
 		# Tutorial Text through new font system
-		self.tutorial_text = self.createTextExt(self.GameFrame, x=WINDOW_W/2, y=WINDOW_H/2, text=HOWTOPLAY, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=40, anchor="center", tags="tutorialItems", ml=True, width=WINDOW_W-80, spacing=25)
+		self.tutorial_text = self.createTextExt(self.GameFrame, x=WINDOW_W/2, y=WINDOW_H/2, text=HOWTOPLAY, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=40, anchor="center", tags="tutorialItems", ml=True, width=WINDOW_W-20, spacing=25)
 		
 		# Back button
 		self.create_BackButton(self.goto_MainMenu)
@@ -299,6 +337,9 @@ class Application(tk.Frame):
 		
 		# Remove everything from the screen
 		self.remove_Everything()
+		
+		# Set Background
+		self.set_Background(FOLDER_DEFAULT)
 		
 		# Game over text
 		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.25, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
@@ -329,11 +370,14 @@ class Application(tk.Frame):
 		self.remove_Everything()
 		
 		# Determine in what mode we are
+		global FOLDER_LEVEL
 		if self.gameMode == "survival":
-			FOLDER_LEVEL = "./data/levels/survival/"
+			FOLDER_LEVEL = "./data/levels/0-survival/"
+			self.set_Background(FOLDER_LEVEL)
 			self.start_Game()
 		elif self.gameMode == "level":
-			FOLDER_LEVEL = "./data/" + self.levelFolder
+			FOLDER_LEVEL = "./data/levels/" + self.levelFolder
+			self.set_Background(FOLDER_LEVEL)
 			self.start_Game()
 		
 	def start_Game(self):
