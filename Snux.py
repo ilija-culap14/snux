@@ -122,7 +122,7 @@ class Application(tk.Frame):
 		self.set_Background(FOLDER_DEFAULT)
 		
 		# Show greeting and go to MainMenu
-		#self.show_Greeting()
+		self.show_Greeting()
 		self.goto_MainMenu(self)
 			
 	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
