@@ -199,7 +199,7 @@ class Application(tk.Frame):
 		self.backgroundImageOnCanvas = self.GameFrame.create_image(0, 0, image=self.backgroundImage, anchor=tk.NW, tags="initialItem")
 
 		# Version in bottom right corner
-		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - 20, WINDOW_H - 20, text=LABEL_VERSION + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=17, anchor="se", tags="initialItem")
+		self.versionNumber = self.createTextExt(self.GameFrame, WINDOW_W - 20, WINDOW_H - 20, text=LABEL_VERSION + " " + GAME_VERSION, fill=TEXT_COLOR, fontfile=FONTFILE_VERSION, size=25, anchor="se", tags="initialItem")
 		self.GameFrame.pack()
 		
 	def create_BackButton(self, where):
