@@ -76,7 +76,7 @@ TAIL_COLOR = "yellow"
 
 # Menus and buttons
 COLOR_MENU = "white"
-COLOR_MENU_OVER = "#1B94C6"
+COLOR_MENU_OVER = "#3f5768"
 GAME_OVER_LABEL_COLOR = "yellow"
 GAME_WIN_LABEL_COLOR = "yellow"
 
@@ -125,7 +125,7 @@ class Application(tk.Frame):
 		self.show_Greeting()
 		self.goto_MainMenu(self)
 			
-	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
+	def createTextExt(self, canvas, x, y, size=12, fill="white", text="", fontfile="", anchor="center", state=tk.NORMAL, tags=(), ml=False, width=100, spacing=0, bind=False, bindfunc=0):
 		
 		# Create Font
 		font = pilfont.truetype(fontfile, size)
@@ -184,7 +184,7 @@ class Application(tk.Frame):
 		tags_out = (tags, objectID)
 
 		# Show image
-		self.imgdraw = canvas.create_image(x, y, image=imgext, anchor=anchor, tags=tags_out)
+		self.imgdraw = canvas.create_image(x, y, image=imgext, anchor=anchor, tags=tags_out, state=state)
 		
 		if bind == True:
 			self.GameFrame.tag_bind(objectID, "<Button-1>", bindfunc)
@@ -233,14 +233,15 @@ class Application(tk.Frame):
 		# Remove everything from screen
 		self.remove_Everything()
 
+		# Set initial background image and version number
+		self.set_Background(FOLDER_DEFAULT)
+
 		# Survival mode
 		def onSurvivalMode(event):
-			self.gameMode = "survival"
-			self.goto_PlayGame(self)
+			self.goto_PlayGame(self, gamemode="survival", level="")
 			
 		# Level mode
 		def onLevelMode(event):
-			self.gameMode = "level"
 			self.goto_LevelSelector(self)
 		
 		# Heading
@@ -267,40 +268,58 @@ class Application(tk.Frame):
 		self.remove_Everything()
 
 		# Heading
-		self.levelSelectorHeading = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.18, text=LABEL_LEVELSELECTOR_HEADING, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="wmitemTag")
-		
-		# Grid is 3x3 for levels
-		# Every element has picture (thumb.png) and name from LEVELS_INFO
-		
+		self.levelSelectorHeading = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.16, text=LABEL_LEVELSELECTOR_HEADING, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="wmitemTag")
+				
 		# Read manifest file to determine what levels are installed
-		global LEVELS_INFO
 		with open(FOLDER_LEVELS + "manifest", "r") as f:
+			global LEVELS_INFO
+			LEVELS_INFO = []
 			for line in f.readlines():
 				if line == "\n":
 					pass
 				else:
 					LEVELS_INFO.append(line.replace("\n", "").split("@@@@@"))
 			
-		
 		#################################
 		# 
 		# INFO
 		#
-		# Level folder containt: 
+		# Level folder contains: 
 		#      - bg.png
 		#      - food-1.png
 		#      - food-2.png
 		#      - food-3.png
 		#      - food-bonus.png
-		#      - thumb.png
 		#      - snake.cfg
-		#      - const.png
 		# 
 		#################################
 		
-		# Debug
-		self.levelFolder = "level-1"
+		# Create levels
+		for nmb, level in enumerate(LEVELS_INFO):
+			
+			# Create rectangle
+			self.GameFrame.create_rectangle(WINDOW_W * 0.1, ((nmb+1)*200), WINDOW_W * 0.9, ((nmb+1)*200) + 170, fill="", activefill=COLOR_MENU_OVER, width=2, outline=FRAME_COLOR, tags=("LID-" + str(level[0]), "wmitemTag"))
+
+			# Create text
+			self.levelHeading = self.createTextExt(self.GameFrame, WINDOW_W/2,  ((nmb+1)*200) + 80, text=level[1], fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=50, anchor=tk.CENTER, tags="wmitemTag", state=tk.DISABLED)
 		
+		# Level-1 
+		def onLevel1(event):
+			self.goto_PlayGame(self, gamemode="level", level=LEVELS_INFO[0][0])
+			
+		# Level-2
+		def onLevel2(event):
+			self.goto_PlayGame(self, gamemode="level", level=LEVELS_INFO[1][0])
+
+		# Level-3
+		def onLevel3(event):
+			self.goto_PlayGame(self, gamemode="level", level=LEVELS_INFO[2][0])
+
+		# Bind it to levels
+		self.GameFrame.tag_bind("LID-1-snow", "<Button-1>", onLevel1)
+		self.GameFrame.tag_bind("LID-2-space", "<Button-1>", onLevel2)
+		self.GameFrame.tag_bind("LID-3-desert", "<Button-1>", onLevel3)
+
 		# Back button
 		self.create_BackButton(self.goto_GameSelector)
 				
@@ -330,7 +349,7 @@ class Application(tk.Frame):
 		self.licence1 = self.createTextExt(self.GameFrame, x=WINDOW_W*0.60, y=500, text=TEXT_ABOUT_3, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="w", tags="aboutItems")
 		self.licence2 = self.createTextExt(self.GameFrame, x=WINDOW_W*0.60, y=530, text=GAME_LICENCE, fill=TEXT_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=30, anchor="w", tags="aboutItems")
 		
-	def goto_GameOver(self): #### Need work
+	def goto_GameOver(self, gamemode, level):
 		
 		# Show cursor, need to add it at game_win
 		root.config(cursor="arrow")
@@ -339,7 +358,7 @@ class Application(tk.Frame):
 		self.remove_Everything()
 		
 		# Set Background
-		self.set_Background(FOLDER_DEFAULT)
+		self.set_Background(FOLDER_LEVEL)
 		
 		# Game over text
 		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.25, text=LABEL_GAME_OVER, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMEOVER, size=80, anchor=tk.CENTER, tags="goScreenItem")
@@ -347,8 +366,12 @@ class Application(tk.Frame):
 		# Score
 		self.game_over_text = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.4, text=LABEL_SCORE + str(self.snakePoints), fill="grey", fontfile=FONTFILE_BACK, size=50, anchor=tk.CENTER, tags="goScreenItem")
 
+		# On new game button
+		def onNewGame(event):
+			self.goto_PlayGame(self.GameFrame, gamemode=gamemode, level=level)
+
 		# Menu
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_PlayGame)
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_NEW_GAME, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=onNewGame)
 		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.6, text=LABEL_CHOOSE_GAME, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_GameSelector)
 		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_MAIN_MENU, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.goto_MainMenu)
 		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.7, text=LABEL_QUIT, fill=COLOR_MENU, fontfile=FONTFILE_MENUITEM, size=30, anchor="center", tags="goScreenItem", bind=True, bindfunc=self.quit_game)
@@ -357,31 +380,49 @@ class Application(tk.Frame):
 		
 		# Remove everything from screen
 		self.remove_Everything()
-		
-		# Main menu buttons
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.35, text=LABEL_NEW_GAME, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.goto_GameSelector)
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.45, text=LABEL_TUTORIAL, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.goto_Tutorial)
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_ABOUT, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.goto_About)
-		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", tags="wmitemTag", bind=True, bindfunc=self.quit_game)
 
-	def goto_PlayGame(self, GameFrame):
+		# Set initial background image and version number
+		self.set_Background(FOLDER_DEFAULT)
+		
+		# Main menu buttons, every button has rect and text
+		# New game
+		self.GameFrame.create_rectangle(WINDOW_W * 0.3, WINDOW_H*0.35-30, WINDOW_W * 0.7, WINDOW_H*0.35 + 45, fill="", activefill=COLOR_MENU_OVER, width=2, outline=FRAME_COLOR, tags=("wmitemTag", "newgameRect"))
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.35, text=LABEL_NEW_GAME, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", state=tk.DISABLED, tags="wmitemTag")
+		self.GameFrame.tag_bind("newgameRect", "<Button-1>", self.goto_GameSelector)
+		
+		# Tutorial
+		self.GameFrame.create_rectangle(WINDOW_W * 0.3, WINDOW_H*0.45-30, WINDOW_W * 0.7, WINDOW_H*0.45 + 45, fill="", activefill=COLOR_MENU_OVER, width=2, outline=FRAME_COLOR, tags=("wmitemTag", "tutorialRect"))
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.45, text=LABEL_TUTORIAL, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", state=tk.DISABLED, tags="wmitemTag")
+		self.GameFrame.tag_bind("tutorialRect", "<Button-1>", self.goto_Tutorial)
+
+		# About
+		self.GameFrame.create_rectangle(WINDOW_W * 0.3, WINDOW_H*0.55-30, WINDOW_W * 0.7, WINDOW_H*0.55 + 45, fill="", activefill=COLOR_MENU_OVER, width=2, outline=FRAME_COLOR, tags=("wmitemTag", "aboutRect"))
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.55, text=LABEL_ABOUT, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", state=tk.DISABLED, tags="wmitemTag")
+		self.GameFrame.tag_bind("aboutRect", "<Button-1>", self.goto_About)
+
+		# Quit
+		self.GameFrame.create_rectangle(WINDOW_W * 0.3, WINDOW_H*0.65-30, WINDOW_W * 0.7, WINDOW_H*0.65 + 45, fill="", activefill=COLOR_MENU_OVER, width=2, outline=FRAME_COLOR, tags=("wmitemTag", "quitRect"))
+		self.mmButton = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H*0.65, text=LABEL_QUIT, fill=TEXT_COLOR, fontfile=FONTFILE_MENUITEM, size=60, anchor="center", state=tk.DISABLED, tags="wmitemTag")
+		self.GameFrame.tag_bind("quitRect", "<Button-1>", self.quit_game)
+
+	def goto_PlayGame(self, GameFrame, gamemode, level):
 		
 		# Remove everything from the screen
 		self.remove_Everything()
 		
 		# Determine in what mode we are
 		global FOLDER_LEVEL
-		if self.gameMode == "survival":
+		if gamemode == "survival":
 			FOLDER_LEVEL = "./data/levels/0-survival/"
 			self.set_Background(FOLDER_LEVEL)
-			self.start_Game()
-		elif self.gameMode == "level":
-			FOLDER_LEVEL = "./data/levels/" + self.levelFolder
+			self.start_Game(gamemode, level)
+		elif gamemode == "level":
+			FOLDER_LEVEL = "./data/levels/" + level + "/"
 			self.set_Background(FOLDER_LEVEL)
-			self.start_Game()
+			self.start_Game(gamemode, level)
 		
-	def start_Game(self):
-		
+	def start_Game(self, gamemode, level):
+
 		# Disable cursor
 		root.config(cursor="none")
 		
@@ -501,10 +542,6 @@ class Application(tk.Frame):
 			# Bumb level up for 5 eaten food
 			level = round((x/5) - 0.49)
 			return level
-			
-		def defineGameMode():
-			# This function need to define mode and set all vars
-			pass
 
 		def update_index():
 			
@@ -527,13 +564,13 @@ class Application(tk.Frame):
 			
 			# If snake touches the edge
 			if snake_index[0] == 0 or snake_index[0] > gameGridWidth or snake_index[1] == 0 or snake_index[1] > gameGridHeight:
-				self.goto_GameOver()
+				self.goto_GameOver(gamemode=gamemode, level=level)
 				return True
 			
 			# If snake head touches snake tail
 			for x in range(1, self.snake_tail):
 				if snake_index[0] == snake_index[x*2] and snake_index[1] == snake_index[(x*2)+1]:
-					self.goto_GameOver()
+					self.goto_GameOver(gamemode=gamemode, level=level)
 					return True
 		
 		def arrow_key_up(event):
