@@ -438,10 +438,10 @@ class Application(tk.Frame):
 		snake_index = [10, 11, 9, 11, 8, 11, 7, 11, 6, 11, 5, 11]
 		
 		# Food index
-		food_index_1 = [0, 0]
-		food_index_2 = [0, 0]
-		food_index_3 = [0, 0]
-		food_index_bonus = [0, 0]
+		self.food_index_1 = [12, 11]
+		self.food_index_2 = [13, 11]
+		self.food_index_3 = [14, 11]
+		self.food_index_bonus = [15, 11]
 		
 		# Some vars for game
 		self.snake_tail = 5
@@ -473,73 +473,99 @@ class Application(tk.Frame):
 																	gridOriginX + (snake_index[(i*2)]*40) - 8, 
 																	gridOriginY + (snake_index[(i*2)+1]*40) - 8, 
 																	fill=TAIL_COLOR, tags=("tailItems", "gameItems"))
-																	 
-				
+
+		def findEmptySpot(): # Needs rework
+			
+			# Create list for empty spots
+			self.emptySpots = []
+
+			# Generate the list with all fields
+			for spotX in range(1, gameGridWidth):
+				for spotY in range(1, gameGridHeight):
+					self.emptySpots.insert(0, (spotX, spotY))
+			
+			# Remove spots where the snake is
+			for item in range(int(len(snake_index)/2)):
+				try:
+					self.emptySpots.remove((snake_index[item*2], snake_index[(item*2)+1]))
+				except:
+					pass
+			
+			# Remove spots allready in use
+			try:
+				self.emptySpots.remove((self.food_index_1[0], self.food_index_1[1]))
+				self.emptySpots.remove((self.food_index_2[0], self.food_index_1[1]))
+				self.emptySpots.remove((self.food_index_3[0], self.food_index_1[1]))
+				self.emptySpots.remove((self.food_index_bonus[0], self.food_index_1[1]))
+			except:
+				pass
+
+			# Return random spot
+			return self.emptySpots[randint(0, len(self.emptySpots)-1)]
+
 		def createFood_1():
 			
-			# need work
-			food_index_1.insert(0, randint(1, gameGridHeight))
-			food_index_1.insert(0, randint(1, gameGridWidth))
-			
-			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_1.png")
-			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_1[0]*40), 
-																	 gridOriginY + (food_index_1[1]*40), anchor=tk.SE,image=self.foodImage, 
-																	 tags=("foodItem", "gameItems"))
+			# Get free spot
+			self.food_index_1 = findEmptySpot()
+	
+			# Draw food
+			self.foodImage_1 = tk.PhotoImage(file = FOLDER_LEVEL + "food_1.png")
+			self.imgObjects.append(self.food_index_1)
+			self.food_object_1 = self.GameFrame.create_image(gridOriginX + (self.food_index_1[0]*40), 
+																	 gridOriginY + (self.food_index_1[1]*40), anchor=tk.SE, image=self.foodImage_1, 
+																	 tags=("foodItem", "foodItem-1", "gameItems"))
 				
 		def createFood_2():
 			
-			# need work
-			food_index.insert(0, randint(1, gameGridHeight))
-			food_index.insert(0, randint(1, gameGridWidth))
+			# Get free spot
+			self.food_index_2 = findEmptySpot()
 			
-			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_2.png")
-			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_2[0]*40), 
-																	 gridOriginY + (food_index_2[1]*40), anchor=tk.SE,image=self.foodImage, 
-																	 tags=("foodItem", "gameItems"))
+			# Draw food
+			self.foodImage_2 = tk.PhotoImage(file = FOLDER_LEVEL + "food_2.png")
+			self.imgObjects.append(self.food_index_2)
+			self.food_object_2 = self.GameFrame.create_image(gridOriginX + (self.food_index_2[0]*40), 
+																	 gridOriginY + (self.food_index_2[1]*40), anchor=tk.SE,image=self.foodImage_2, 
+																	 tags=("foodItem", "foodItem-2", "gameItems"))
 				
 		def createFood_3():
 			
-			# need work
-			food_index.insert(0, randint(1, gameGridHeight))
-			food_index.insert(0, randint(1, gameGridWidth))
+			# Get free spot
+			self.food_index_3 = findEmptySpot()
 			
 			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_3.png")
-			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_3[0]*40), 
-																	 gridOriginY + (food_index_3[1]*40), anchor=tk.SE,image=self.foodImage, 
-																	 tags=("foodItem", "gameItems"))
+			self.foodImage_3 = tk.PhotoImage(file = FOLDER_LEVEL + "food_3.png")
+			self.imgObjects.append(self.food_index_3)
+			self.food_object_3 = self.GameFrame.create_image(gridOriginX + (self.food_index_3[0]*40), 
+																	 gridOriginY + (self.food_index_3[1]*40), anchor=tk.SE,image=self.foodImage_3, 
+																	 tags=("foodItem", "foodItem-3", "gameItems"))
 				
 		def createFood_Bonus():
 			
-			# Put some random number in food index, need work
-			# i need function that gets free spot on map
-			# then randomly select one of them
-			food_index.insert(0, randint(1, gameGridHeight))
-			food_index.insert(0, randint(1, gameGridWidth))
+			# Get free spot
+			self.food_index_bonus = findEmptySpot()
 			
 			# Testing image as food
-			self.foodImage = tk.PhotoImage(file = FOLDER_LEVEL + "food_bonus.png")
-			self.food_object = self.GameFrame.create_image(gridOriginX + (food_index_bonus[0]*40), 
-																	 gridOriginY + (food_index_bonus[1]*40), anchor=tk.SE,image=self.foodImage, 
-																	 tags=("foodItem", "gameItems"))
+			self.foodImage_bonus = tk.PhotoImage(file = FOLDER_LEVEL + "food_bonus.png")
+			self.imgObjects.append(self.food_index_bonus)
+			self.food_object_bonus = self.GameFrame.create_image(gridOriginX + (self.food_index_bonus[0]*40), 
+																	 gridOriginY + (self.food_index_bonus[1]*40), anchor=tk.SE,image=self.foodImage_bonus, 
+																	 tags=("foodItem", "foodItem-Bonus", "gameItems"))
 				
-		def getCalories():
+		def getCalories(food, location):
 			
 			# 10 points for food
-			self.snakePoints += 10
+			self.snakePoints += 10 + (food*5)
 			self.snakePoints += round(self.snake_tail/3)
 			
 			# Bonus for edge objects
-			if food_index_1[0] == 1 or food_index_1[0] == gameGridWidth:
+			if self.food_index_1[0] == 1 or self.food_index_1[0] == gameGridWidth:
 				self.snakePoints += 4
-			if food_index_1[1] == 1 or food_index_1[1] == gameGridHeight:
+			if self.food_index_1[1] == 1 or self.food_index_1[1] == gameGridHeight:
 				self.snakePoints += 4
 		
 		def define_level(x):
 			
-			# Bumb level up for 5 eaten food
+			# Bump level up for 5 eaten food
 			level = round((x/5) - 0.49)
 			return level
 
@@ -609,7 +635,6 @@ class Application(tk.Frame):
 			self.GameFrame.unbind(KEY_LEFT)
 			self.GameFrame.unbind(KEY_RIGHT)
 		
-		# Hier is function for moving the snake
 		def moveSnake():
 			
 			# Set focus and bind keys
@@ -621,11 +646,11 @@ class Application(tk.Frame):
 			update_index()
 			create_tail()
 			
-			# If food is eaten
-			if snake_index[0] == food_index_1[0] and snake_index[1] == food_index_1[1]:
+			# If food-1 is eaten
+			if snake_index[0] == self.food_index_1[0] and snake_index[1] == self.food_index_1[1]:
 				self.foodEaten = True
-				getCalories()
-				self.GameFrame.delete("foodItem")
+				getCalories(1, self.food_index_1)
+				self.GameFrame.delete("foodItem-1")
 				self.snake_tail += 1
 				
 				# Update score and points
@@ -636,12 +661,27 @@ class Application(tk.Frame):
 				# Create new food
 				createFood_1()
 			
+			# If food-2 is eaten
+			if snake_index[0] == self.food_index_2[0] and snake_index[1] == self.food_index_2[1]:
+				self.foodEaten = True
+				getCalories(2, self.food_index_2)
+				self.GameFrame.delete("foodItem-2")
+				self.snake_tail += 1
+				
+				# Update score and points
+				self.GameFrame.delete("headerItem")
+				self.scoreText = self.createTextExt(self.GameFrame, 50, 25, text=LABEL_SCORE + str(self.snakePoints), fill=TEXT_COLOR, fontfile=FONTFILE_BACK, size=20, anchor="w", tags="headerItem")
+				self.levelText = self.createTextExt(self.GameFrame, WINDOW_W - 50, 25, text=LABEL_LEVEL + str(define_level(self.snake_tail)), fill=TEXT_COLOR, fontfile=FONTFILE_BACK, size=20, anchor="e", tags="headerItem")
+
+				# Create new food
+				createFood_2()
+			
 			# Look for gameover
 			if self.snakeMoves:
 				if checkGameOver() == True:
 					snakeMoves = False
 				else:
-					self.GameFrame.after(120 - round(self.snake_tail/3), moveSnake)
+					self.GameFrame.after(100 - round(self.snake_tail/3), moveSnake)
 		
 		# Get ready
 		self.getReadyLabel = self.createTextExt(self.GameFrame, WINDOW_W/2, WINDOW_H/2, text=LABEL_GETREADY, fill=GAME_OVER_LABEL_COLOR, fontfile=FONTFILE_GAMESELECTOR_HEADING, size=130, anchor=tk.CENTER, tags="getReady")
@@ -655,6 +695,7 @@ class Application(tk.Frame):
 
 		# Create a food item and snake head
 		createFood_1()
+		createFood_2()
 		create_head()
 		
 		# Start moving the snake
