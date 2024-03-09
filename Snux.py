@@ -480,8 +480,8 @@ class Application(tk.Frame):
 			self.emptySpots = []
 
 			# Generate the list with all fields
-			for spotX in range(1, gameGridWidth):
-				for spotY in range(1, gameGridHeight):
+			for spotX in range(1, gameGridWidth + 1):
+				for spotY in range(1, gameGridHeight + 1):
 					self.emptySpots.insert(0, (spotX, spotY))
 			
 			# Remove spots where the snake is
