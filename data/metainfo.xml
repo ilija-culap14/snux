@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.snux</id>
+  
+  <name>Snux</name>
+  <summary>Simple Snake Game</summary>
+  
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  
+  <description>
+    <p>
+      This is simple snake game written in Python and Tkinter
+    </p>
+  </description>
+  
+  <launchable type="desktop-id">io.github.snux.desktop</launchable>
+</component>
