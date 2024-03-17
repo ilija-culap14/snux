@@ -76,8 +76,10 @@ modules:
     - cp -r . /app/snux/
     - mkdir -p /app/share/icons/hicolor/512x512/apps/
     - mkdir -p /app/share/applications/
+    - mkdir -p /app/share/metainfo/
     - mv /app/snux/data/icon.png /app/share/icons/hicolor/512x512/apps/io.github.snux.png
     - mv /app/snux/data/snux.desktop /app/share/applications/io.github.snux.desktop
+    - mv /app/snux/data/metainfo.xml /app/share/metainfo/io.github.snux.metainfo.xml
     - rm /app/snux/*.png
   sources:
     - type: git
