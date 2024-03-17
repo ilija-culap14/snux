@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Snux
-Exec=snux
+Exec=/app/run-snux.sh
 Type=Application
 Icon=io.github.snux.png
 Categories=Game;
