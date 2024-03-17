@@ -74,11 +74,15 @@ modules:
   buildsystem: simple
   build-commands:
     - cp -r . /app/snux/
+    - mkdir -p /app/share/icons/hicolor/512x512/apps/
+    - mkdir -p /app/share/applications/
+    - mv /app/snux/data/icon.png /app/share/icons/hicolor/512x512/apps/io.github.snux.png
+    - mv /app/snux/data/snux.desktop /app/share/applications/io.github.snux.desktop
     - rm /app/snux/*.png
   sources:
     - type: git
       url: https://github.com/ilija-culap14/snux
-      commit: 78e5cda
+      commit: master
 
 finish-args:
   - --socket=x11

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Snux
+Exec=snux
+Type=Application
+Icon=io.github.snux.png
+Categories=Game;
