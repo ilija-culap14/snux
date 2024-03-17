@@ -2,5 +2,5 @@
 Name=Snux
 Exec=/app/run-snux.sh
 Type=Application
-Icon=io.github.snux.png
+Icon=io.github.snux
 Categories=Game;
